@@ -115,9 +115,9 @@ const myWebsites = [
   },
   {
     id: 2,
-    Title: "AccValo Shop",
-    Img: "https://via.placeholder.com/600x400/1f2937/ffffff?text=AccValo.shop", // Örnek placeholder
-    Description: "AccValo Shop hakkında kısa açıklama veya tanıtım metni buraya gelebilir.",
+    Title: "AccValo.Shop",
+    Img: "./valorant.png", // Örnek placeholder
+    Description: "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
     Link: "https://www.accvalo.shop/",
   },
 ];
