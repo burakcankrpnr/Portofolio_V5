@@ -1,4 +1,4 @@
-import React, { useEffect, memo, useMemo } from "react"
+import React, { useEffect, useState, memo, useMemo } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
@@ -21,13 +21,14 @@ const Header = memo(() => (
       data-aos-duration="800"
     >
       <Sparkles className="w-5 h-5 text-purple-400" />
-      Fikirleri dijital deneyimlere dönüştürmek      <Sparkles className="w-5 h-5 text-purple-400" />
+      Fikirleri dijital deneyimlere dönüştürmek
+      <Sparkles className="w-5 h-5 text-purple-400" />
     </p>
   </div>
 ));
 
 const ProfileImage = memo(() => (
-  <div className="flex justify-end items-center sm:p-12 sm:py-0 sm:pb-0 p-0 py-2 pb-2">
+  <div className="flex justify-end items-center sm:p-12 sm:py-0 p-0 py-2">
     <div 
       className="relative group" 
       data-aos="fade-up"
@@ -70,7 +71,7 @@ const ProfileImage = memo(() => (
 const StatCard = memo(({ icon: Icon, color, value, label, description, animation }) => (
   <div data-aos={animation} data-aos-duration={1300} className="relative group">
     <div className="relative z-10 bg-gray-900/50 backdrop-blur-lg rounded-2xl p-6 border border-white/10 overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl h-full flex flex-col justify-between">
-      <div className={`absolute -z-10 inset-0 bg-gradient-to-br ${color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`}></div>
+      <div className={`absolute -z-10 inset-0 bg-gradient-to-br ${color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
       
       <div className="flex items-center justify-between mb-4">
         <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/10 transition-transform group-hover:rotate-6">
@@ -112,37 +113,17 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 ));
 
 const AboutPage = () => {
-  // Memoized calculations
-  const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
-    const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
-    
-    const startDate = new Date("2021-11-06");
-    const today = new Date();
-    const experience = today.getFullYear() - startDate.getFullYear() -
-      (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
-
-    return {
-      totalProjects: storedProjects.length,
-      totalCertificates: storedCertificates.length,
-      YearExperience: experience
-    };
-  }, []);
+  // GitHub repo sayısını tutmak için state
+  const [projectCount, setProjectCount] = useState(0);
 
   // AOS initialization
   useEffect(() => {
-    const initAOS = () => {
-      AOS.init({
-        once: false,
-      });
-    };
+    AOS.init({ once: false });
 
-    initAOS();
-    
     let resizeTimer;
     const handleResize = () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(initAOS, 250);
+      resizeTimer = setTimeout(() => AOS.init({ once: false }), 250);
     };
 
     window.addEventListener('resize', handleResize);
@@ -152,12 +133,32 @@ const AboutPage = () => {
     };
   }, []);
 
-  // Memoized stats data
+  // GitHub'dan proje sayısı çekme
+  useEffect(() => {
+    // Kullanıcı adınızı buraya yazın:
+    const username = "burakcankrpnr";
+    fetch(`https://api.github.com/users/${username}/repos`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setProjectCount(data.length);
+        }
+      })
+      .catch(err => {
+        console.error("GitHub projeleri alınırken hata:", err);
+      });
+  }, []);
+
+  // İstediğiniz sabit değerler
+  const totalCertificates = 0;  // sertifikalar
+  const YearExperience = 2;     // yıllık deneyim
+
+  // Stat verilerini memo ile saklıyoruz
   const statsData = useMemo(() => [
     {
       icon: Code,
       color: "from-[#6366f1] to-[#a855f7]",
-      value: totalProjects,
+      value: projectCount,
       label: "Toplam Projeler",
       description: "Yenilikçi web çözümleri tasarlandı.",
       animation: "fade-right",
@@ -178,7 +179,7 @@ const AboutPage = () => {
       description: "Sürekli öğrenme yolculuğu!",
       animation: "fade-left",
     },
-  ], [totalProjects, totalCertificates, YearExperience]);
+  ], [projectCount, totalCertificates, YearExperience]);
 
   return (
     <div
@@ -208,16 +209,17 @@ const AboutPage = () => {
             </h2>
             
             <p 
-              className="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed text-justify pb-4 sm:pb-0"
-              data-aos="fade-right"
-              data-aos-duration="1500"
-            >
-              Mehmet Akif Ersoy Üniversitesi'nde Bilgisayar Mühendisliği eğitimi alıyor ve aynı zamanda Full Stack 
-              Developer olarak çalışıyorum. JavaScript, React.js, Node.js ve CSS gibi teknolojilerde deneyime sahibim. 
-              Sürekli öğrenmeyi ve mesleki gelişimime yatırım yapmayı önemsiyorum. Desird Design Arge ve Acc Studio’da 
-              edindiğim tecrübelerle, yenilikçi teknolojileri hızla benimseyip yüksek performanslı projeler 
-              geliştirmeye odaklanıyorum.
-            </p>
+  className="text-base sm:text-lg lg:text-xl text-gray-400 leading-relaxed text-justify pb-4 sm:pb-0"
+  data-aos="fade-right"
+  data-aos-duration="1500"
+>
+  Mehmet Akif Ersoy Üniversitesi'nde Bilgisayar Mühendisliği eğitimi aldım ve Full Stack Developer olarak çalışıyorum. 
+  JavaScript, React.js, Node.js ve CSS gibi teknolojilerde uzmanlaşarak, ölçeklenebilir ve performans odaklı yazılım 
+  çözümleri geliştiriyorum. Sürekli öğrenme ve mesleki gelişime büyük önem veriyor, en yeni teknolojileri takip ederek 
+  projelerime entegre ediyorum. Desird Design Arge ve Acc Studio'da edindiğim deneyimler sayesinde, yenilikçi yaklaşımlar 
+  benimseyerek yüksek kaliteli yazılım ürünleri oluşturmayı hedefliyorum.
+</p>
+
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
               <a
@@ -256,26 +258,26 @@ const AboutPage = () => {
         </a>
       </div>
 
-      <style jsx>{
-        `
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes spin-slower {
-          to { transform: rotate(360deg); }
-        }
-        .animate-bounce-slow {
-          animation: bounce 3s infinite;
-        }
-        .animate-pulse-slow {
-          animation: pulse 3s infinite;
-        }
-        .animate-spin-slower {
-          animation: spin-slower 8s linear infinite;
-        }
-        `
-      }</style>
+      <style jsx>
+        {`
+          @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+          }
+          @keyframes spin-slower {
+            to { transform: rotate(360deg); }
+          }
+          .animate-bounce-slow {
+            animation: bounce 3s infinite;
+          }
+          .animate-pulse-slow {
+            animation: pulse 3s infinite;
+          }
+          .animate-spin-slower {
+            animation: spin-slower 8s linear infinite;
+          }
+        `}
+      </style>
     </div>
   );
 };

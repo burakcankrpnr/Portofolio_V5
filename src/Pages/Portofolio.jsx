@@ -1,7 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-// Firestore importlarını kaldırdık, çünkü Firestore projelerini kullanmıyoruz
-// import { db, collection } from "../firebase";
-// import { getDocs } from "firebase/firestore";
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
@@ -14,13 +11,13 @@ import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import Certificate from "../components/Certificate";
 import { Code, Award, Boxes } from "lucide-react";
 
-// Ortak GitHub proje görseli (dilersen buradaki URL'yi farklı bir resimle değiştirebilirsin)
-const GITHUB_PLACEHOLDER_IMG = "https://via.placeholder.com/600x400/334155/ffffff?text=GitHub+Project";
+// Ortak GitHub proje görseli (varsayılan placeholder)
+const GITHUB_PLACEHOLDER_IMG =
+  "https://www.bleepstatic.com/content/hl-images/2022/04/08/GitHub__headpic.jpg";
 
-// Separate ShowMore/ShowLess button component
+// Show More / Show Less butonu
 const ToggleButton = ({ onClick, isShowingMore }) => (
   <button
     onClick={onClick}
@@ -104,33 +101,27 @@ function a11yProps(index) {
   };
 }
 
-// Koddan eklemek istediğin web siteleri
+// Web Siteleri
 const myWebsites = [
   {
     id: 1,
     Title: "HabboTPD",
-    Img: "./tpdgiris.png", // Örnek placeholder
-    Description: " 100'den fazla günlük aktif kullanıcı için modern bir topluluk etkileşim deneyimi sağlamayı amaçlayan tam özellikli bir web platformu geliştirildi. Veri korumasını ve oturum güvenliğini garanti altına alarak güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı.Kullanıcı etkinliğini, profil ayrıntılarını ve performans ölçümlerini gösteren modüler bir gösterge paneli tasarlandı.Optimum kullanıcı deneyimi için React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu bir kullanıcı arayüzü oluşturuldu.",
+    Img: "./tpdgiris.png",
+    Description:
+      "100'den fazla günlük aktif kullanıcı için modern bir topluluk etkileşim deneyimi sağlamayı amaçlayan tam özellikli bir web platformu geliştirildi. Veri korumasını ve oturum güvenliğini garanti altına alarak güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliğini, profil ayrıntılarını ve performans ölçümlerini gösteren modüler bir gösterge paneli tasarlandı. Optimum kullanıcı deneyimi için React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu bir kullanıcı arayüzü oluşturuldu.",
     Link: "https://habbotpd.com/",
   },
   {
     id: 2,
     Title: "AccValo.Shop",
-    Img: "./valorant.png", // Örnek placeholder
-    Description: "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
+    Img: "./valo3.png",
+    Description:
+      "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
     Link: "https://www.accvalo.shop/",
   },
 ];
 
-// Koddan yönetmek istediğin sertifikalar (şu an 1 adet)
-const myCertificates = [
-  {
-    Img: "https://via.placeholder.com/600x400/1f2937/ffffff?text=Sertifika",
-    // Buraya sertifikaya dair (Title, Date vb.) alanlar da eklenebilir
-  },
-];
-
-// Teknik yeterlilikler
+// Teknik Yeterlilikler
 const techStacks = [
   { icon: "html.svg", language: "HTML" },
   { icon: "css.svg", language: "CSS" },
@@ -140,7 +131,6 @@ const techStacks = [
   { icon: "vite.svg", language: "Vite" },
   { icon: "nodejs.svg", language: "Node JS" },
   { icon: "bootstrap.svg", language: "Bootstrap" },
-  { icon: "firebase.svg", language: "Firebase" },
   { icon: "MUI.svg", language: "Material UI" },
   { icon: "vercel.svg", language: "Vercel" },
 ];
@@ -152,37 +142,63 @@ export default function FullWidthTabs() {
   // GitHub projeleri
   const [githubProjects, setGithubProjects] = useState([]);
 
-  // Koddan yöneteceğimiz sertifikalar
-  const [certificates, setCertificates] = useState(myCertificates);
-
-  // "See More" mantığı
+  // GitHub projelerinde "See More" özelliği
   const [showAllGithubProjects, setShowAllGithubProjects] = useState(false);
-  const [showAllCertificates, setShowAllCertificates] = useState(false);
 
-  // Mobil ekran için başlangıç limit
-  const isMobile = window.innerWidth < 768;
+  // Ekran genişliği (mobil mi değil mi) - render sonrası hesaplıyoruz
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize(); // ilk açılışta çalıştır
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Başlangıçta kaç proje gösterilsin?
   const initialItems = isMobile ? 4 : 6;
 
-  // AOS başlatma
+  // AOS başlat
   useEffect(() => {
     AOS.init({
       once: false,
     });
   }, []);
 
-  // GitHub projelerini çek
+  // GitHub projelerini çekme fonksiyonu
   const fetchGithubProjects = useCallback(async () => {
     try {
       const response = await fetch("https://api.github.com/users/burakcankrpnr/repos");
       const data = await response.json();
-      // data içindeki her repo için CardProject'e uygun veriler ayarla
-      const formattedRepos = data.map((repo) => ({
-        id: repo.id,
-        Title: repo.name,
-        Description: repo.description || "Açıklama girilmemiş.",
-        Img: GITHUB_PLACEHOLDER_IMG, // Ortak GitHub placeholder resmi
-        Link: repo.html_url,
-      }));
+
+      // Mümkün olan en fazla bilgiyi alarak "Description" alanına ekliyoruz
+      const formattedRepos = data.map((repo) => {
+        // Repo'ya ait ek bilgileri Description içine gömüyoruz.
+        const combinedDesc = `
+${repo.description || "Açıklama girilmemiş."}
+
+• Dil (Language): ${repo.language || "Belirtilmemiş"}
+• Yıldız (Stars): ${repo.stargazers_count}
+• Forks: ${repo.forks_count}
+• Watchers: ${repo.watchers_count}
+• Open Issues: ${repo.open_issues_count}
+• Lisans: ${repo.license?.spdx_id || "Lisans yok"}
+• Topics: ${repo.topics?.join(", ") || "—"}
+• Anasayfa (Homepage): ${repo.homepage || "Yok"}
+• Oluşturulma (Created): ${repo.created_at}
+• Güncellenme (Updated): ${repo.updated_at}
+        `.trim();
+
+        return {
+          id: repo.id,
+          Title: repo.name,
+          Description: combinedDesc,
+          Img: GITHUB_PLACEHOLDER_IMG, // Ortak GitHub placeholder resmi
+          Link: repo.html_url,
+        };
+      });
       setGithubProjects(formattedRepos);
     } catch (error) {
       console.error("Error fetching GitHub projects:", error);
@@ -198,32 +214,22 @@ export default function FullWidthTabs() {
     setValue(newValue);
   };
 
-  // Gösterilecek sertifika ve GitHub projeleri
-  const displayedCertificates = showAllCertificates
-    ? certificates
-    : certificates.slice(0, initialItems);
-
+  // Gösterilecek GitHub proje sayısı
   const displayedGithubProjects = showAllGithubProjects
     ? githubProjects
     : githubProjects.slice(0, initialItems);
 
   // ShowMore/ShowLess fonksiyonu
-  const toggleShowMore = useCallback((type) => {
-    switch (type) {
-      case "certificates":
-        setShowAllCertificates((prev) => !prev);
-        break;
-      case "githubProjects":
-        setShowAllGithubProjects((prev) => !prev);
-        break;
-      default:
-        break;
-    }
+  const toggleShowMore = useCallback(() => {
+    setShowAllGithubProjects((prev) => !prev);
   }, []);
 
   return (
-    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Portofolio">
-      {/* Üst Başlık */}
+    <div
+      className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden"
+      id="Portofolio"
+    >
+      {/* Başlık */}
       <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
         <h2
           className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
@@ -238,13 +244,13 @@ export default function FullWidthTabs() {
           Portföy Vitrini
         </h2>
         <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Projeler, sertifikalar ve teknik uzmanlıklar aracılığıyla yolculuğumu keşfedin.
+          Web sitelerim, GitHub projelerim ve teknik uzmanlıklarım aracılığıyla yolculuğumu keşfedin.
           Her bölüm, sürekli öğrenme yolumda bir dönüm noktasını temsil ediyor.
         </p>
       </div>
 
       <Box sx={{ width: "100%" }}>
-        {/* Tabs */}
+        {/* Sekmeler */}
         <AppBar
           position="static"
           elevation={0}
@@ -311,19 +317,22 @@ export default function FullWidthTabs() {
               },
             }}
           >
+            {/* Tab 1: Web Sitelerim */}
             <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Projeler"
+              label="Web Sitelerim"
               {...a11yProps(0)}
             />
+            {/* Tab 2: Projelerim (GitHub) */}
             <Tab
               icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Sertifikalar"
+              label="Projelerim"
               {...a11yProps(1)}
             />
+            {/* Tab 3: Yetkinliklerim */}
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Yetkinlikler"
+              label="Yetkinliklerim"
               {...a11yProps(2)}
             />
           </Tabs>
@@ -334,96 +343,13 @@ export default function FullWidthTabs() {
           index={value}
           onChangeIndex={setValue}
         >
-          {/* TAB 0: PROJELER */}
+          {/* TAB 0: Web Sitelerim */}
           <TabPanel value={value} index={0} dir={theme.direction}>
-            {/* Web Sitelerim */}
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-white mb-4">Web Sitelerim</h3>
-              <div className="container mx-auto flex justify-center items-center overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                  {myWebsites.map((website, index) => (
-                    <div
-                      key={website.id}
-                      data-aos={
-                        index % 3 === 0
-                          ? "fade-up-right"
-                          : index % 3 === 1
-                          ? "fade-up"
-                          : "fade-up-left"
-                      }
-                      data-aos-duration={
-                        index % 3 === 0
-                          ? "1000"
-                          : index % 3 === 1
-                          ? "1200"
-                          : "1000"
-                      }
-                    >
-                      <CardProject
-                        Img={website.Img}
-                        Title={website.Title}
-                        Description={website.Description}
-                        Link={website.Link}
-                        id={website.id}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* GitHub Projelerim */}
-            <div>
-              <h3 className="text-xl md:text-2xl font-semibold text-white mb-4">GitHub Projelerim</h3>
-              <div className="container mx-auto flex justify-center items-center overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                  {displayedGithubProjects.map((repo, index) => (
-                    <div
-                      key={repo.id}
-                      data-aos={
-                        index % 3 === 0
-                          ? "fade-up-right"
-                          : index % 3 === 1
-                          ? "fade-up"
-                          : "fade-up-left"
-                      }
-                      data-aos-duration={
-                        index % 3 === 0
-                          ? "1000"
-                          : index % 3 === 1
-                          ? "1200"
-                          : "1000"
-                      }
-                    >
-                      <CardProject
-                        Img={repo.Img} // Ortak GitHub placeholder resmi
-                        Title={repo.Title}
-                        Description={repo.Description}
-                        Link={repo.Link}
-                        id={repo.id}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {githubProjects.length > initialItems && (
-                <div className="mt-6 w-full flex justify-start">
-                  <ToggleButton
-                    onClick={() => toggleShowMore("githubProjects")}
-                    isShowingMore={showAllGithubProjects}
-                  />
-                </div>
-              )}
-            </div>
-          </TabPanel>
-
-          {/* TAB 1: SERTİFİKALAR */}
-          <TabPanel value={value} index={1} dir={theme.direction}>
             <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-4">
-                {displayedCertificates.map((certificate, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+                {myWebsites.map((website, index) => (
                   <div
-                    key={index}
+                    key={website.id}
                     data-aos={
                       index % 3 === 0
                         ? "fade-up-right"
@@ -439,22 +365,63 @@ export default function FullWidthTabs() {
                         : "1000"
                     }
                   >
-                    <Certificate ImgSertif={certificate.Img} />
+                    <CardProject
+                      Img={website.Img}
+                      Title={website.Title}
+                      Description={website.Description}
+                      Link={website.Link}
+                      id={website.id}
+                    />
                   </div>
                 ))}
               </div>
             </div>
-            {certificates.length > initialItems && (
+          </TabPanel>
+
+          {/* TAB 1: Projelerim (GitHub Projeleri) */}
+          <TabPanel value={value} index={1} dir={theme.direction}>
+            <div className="container mx-auto flex justify-center items-center overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+                {displayedGithubProjects.map((repo, index) => (
+                  <div
+                    key={repo.id}
+                    data-aos={
+                      index % 3 === 0
+                        ? "fade-up-right"
+                        : index % 3 === 1
+                        ? "fade-up"
+                        : "fade-up-left"
+                    }
+                    data-aos-duration={
+                      index % 3 === 0
+                        ? "1000"
+                        : index % 3 === 1
+                        ? "1200"
+                        : "1000"
+                    }
+                  >
+                    <CardProject
+                      Img={repo.Img} // Ortak GitHub placeholder resmi
+                      Title={repo.Title}
+                      Description={repo.Description}
+                      Link={repo.Link}
+                      id={repo.id}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {githubProjects.length > initialItems && (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
-                  onClick={() => toggleShowMore("certificates")}
-                  isShowingMore={showAllCertificates}
+                  onClick={toggleShowMore}
+                  isShowingMore={showAllGithubProjects}
                 />
               </div>
             )}
           </TabPanel>
 
-          {/* TAB 2: YETKİNLİKLER */}
+          {/* TAB 2: Yetkinliklerim */}
           <TabPanel value={value} index={2} dir={theme.direction}>
             <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">

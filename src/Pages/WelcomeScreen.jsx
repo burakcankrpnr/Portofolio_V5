@@ -4,22 +4,28 @@ import { Code2, Github, Globe, User } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-const TypewriterEffect = ({ text }) => {
+const TypewriterEffect = ({ text, loop = true }) => {
   const [displayText, setDisplayText] = useState('');
-  
+  const [index, setIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index <= text.length) {
-        setDisplayText(text.slice(0, index));
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, 260);
-    
-    return () => clearInterval(timer);
-  }, [text]);
+    if (index === text.length && !isDeleting) {
+      if (!loop) return;
+      setTimeout(() => setIsDeleting(true), 1000); // Bekleme süresi
+    }
+
+    if (isDeleting && index === 0) {
+      setIsDeleting(false);
+    }
+
+    const timer = setTimeout(() => {
+      setDisplayText(text.slice(0, index));
+      setIndex((prev) => prev + (isDeleting ? -1 : 1));
+    }, isDeleting ? 100 : 200); // Yazma süresi daha yavaş, silme süresi daha hızlı
+
+    return () => clearTimeout(timer);
+  }, [index, isDeleting, text, loop]);
 
   return (
     <span className="inline-block">
@@ -28,6 +34,7 @@ const TypewriterEffect = ({ text }) => {
     </span>
   );
 };
+
 
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden">
@@ -150,7 +157,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                 className="text-center"
                 variants={childVariants}
                 data-aos="fade-up"
-                data-aos-delay="1600"
+                data-aos-delay="2600"
               >
                 <a
                   href="https://www.burakcankorpinar.dev"
