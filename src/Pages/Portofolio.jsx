@@ -63,7 +63,9 @@ const ToggleButton = ({ onClick, isShowingMore }) => (
           ${isShowingMore ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"}
         `}
       >
-        <polyline points={isShowingMore ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
+        <polyline
+          points={isShowingMore ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}
+        ></polyline>
       </svg>
     </span>
     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-500/50 transition-all duration-300 group-hover:w-full"></span>
@@ -81,7 +83,8 @@ function TabPanel({ children, value, index, ...other }) {
     >
       {value === index && (
         <Box sx={{ p: { xs: 1, sm: 3 } }}>
-          <Typography>{children}</Typography>
+          {/* IMPORTANT: Use component="div" to avoid nesting warnings */}
+          <Typography component="div">{children}</Typography>
         </Box>
       )}
     </div>
@@ -170,7 +173,9 @@ export default function FullWidthTabs() {
   // GitHub projelerini çekme fonksiyonu
   const fetchGithubProjects = useCallback(async () => {
     try {
-      const response = await fetch("https://api.github.com/users/burakcankrpnr/repos");
+      const response = await fetch(
+        "https://api.github.com/users/burakcankrpnr/repos"
+      );
       const data = await response.json();
 
       // Mümkün olan en fazla bilgiyi alarak "Description" alanına ekliyoruz
@@ -230,7 +235,11 @@ ${repo.description || "Açıklama girilmemiş."}
       id="Portofolio"
     >
       {/* Başlık */}
-      <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
+      <div
+        className="text-center pb-10"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+      >
         <h2
           className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
           style={{
@@ -244,8 +253,9 @@ ${repo.description || "Açıklama girilmemiş."}
           Portföy Vitrini
         </h2>
         <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Web sitelerim, GitHub projelerim ve teknik uzmanlıklarım aracılığıyla yolculuğumu keşfedin.
-          Her bölüm, sürekli öğrenme yolumda bir dönüm noktasını temsil ediyor.
+          Web sitelerim, GitHub projelerim ve teknik uzmanlıklarım aracılığıyla
+          yolculuğumu keşfedin. Her bölüm, sürekli öğrenme yolumda bir dönüm
+          noktasını temsil ediyor.
         </p>
       </div>
 
@@ -267,7 +277,8 @@ ${repo.description || "Açıklama girilmemiş."}
               left: 0,
               right: 0,
               bottom: 0,
-              background: "linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%)",
+              background:
+                "linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%)",
               backdropFilter: "blur(10px)",
               zIndex: 0,
             },
@@ -302,7 +313,8 @@ ${repo.description || "Açıklama girilmemiş."}
                 },
                 "&.Mui-selected": {
                   color: "#fff",
-                  background: "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2))",
+                  background:
+                    "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2))",
                   boxShadow: "0 4px 15px -3px rgba(139, 92, 246, 0.2)",
                   "& .lucide": {
                     color: "#a78bfa",
@@ -443,7 +455,10 @@ ${repo.description || "Açıklama girilmemiş."}
                         : "1000"
                     }
                   >
-                    <TechStackIcon TechStackIcon={stack.icon} Language={stack.language} />
+                    <TechStackIcon
+                      TechStackIcon={stack.icon}
+                      Language={stack.language}
+                    />
                   </div>
                 ))}
               </div>

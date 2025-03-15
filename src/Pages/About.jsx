@@ -223,7 +223,7 @@ const AboutPage = () => {
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
               <a
-                href="https://drive.google.com/file/d/1qjfwKhGgIcQft_nfkZjpeAHCHd70S8Yv/view?usp=sharing"
+                href="https://drive.google.com/file/d/1on0iIxn5Cq9YfC5GmlzTCiheLeWLjExe/view?usp=drive_link"
                 className="w-full lg:w-auto"
               >
                 <button 
@@ -258,7 +258,7 @@ const AboutPage = () => {
         </a>
       </div>
 
-      <style jsx>
+      <style>
         {`
           @keyframes float {
             0%, 100% { transform: translateY(0); }

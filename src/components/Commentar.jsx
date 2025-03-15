@@ -371,7 +371,7 @@ const Komentar = () => {
       </div>
 
       {/* Özel scrollbar stilleri */}
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
