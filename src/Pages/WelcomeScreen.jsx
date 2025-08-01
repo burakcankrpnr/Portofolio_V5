@@ -3,38 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, Github, Globe, User } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-
-const TypewriterEffect = ({ text, loop = true }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [index, setIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (index === text.length && !isDeleting) {
-      if (!loop) return;
-      setTimeout(() => setIsDeleting(true), 1000); // Bekleme süresi
-    }
-
-    if (isDeleting && index === 0) {
-      setIsDeleting(false);
-    }
-
-    const timer = setTimeout(() => {
-      setDisplayText(text.slice(0, index));
-      setIndex((prev) => prev + (isDeleting ? -1 : 1));
-    }, isDeleting ? 100 : 200); // Yazma süresi daha yavaş, silme süresi daha hızlı
-
-    return () => clearTimeout(timer);
-  }, [index, isDeleting, text, loop]);
-
-  return (
-    <span className="inline-block">
-      {displayText}
-      <span className="animate-pulse">|</span>
-    </span>
-  );
-};
-
+import Typewriter from 'typewriter-effect';
 
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden">
@@ -54,6 +23,7 @@ const IconButton = ({ Icon }) => (
 
 const WelcomeScreen = ({ onLoadingComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [typewriterCompleted, setTypewriterCompleted] = useState(false);
 
   useEffect(() => {
     AOS.init({
@@ -62,15 +32,23 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       mirror: false,
     });
 
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setTimeout(() => {
-        onLoadingComplete?.();
-      }, 1000);
-    }, 4000);
-    
-    return () => clearTimeout(timer);
-  }, [onLoadingComplete]);
+    // TypewriterEffect tamamlandıktan sonra sayfa açılsın
+    if (typewriterCompleted) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        setTimeout(() => {
+          onLoadingComplete?.();
+        }, 1000);
+      }, 500); // TypewriterEffect tamamlandıktan sonra 500ms bekle
+      
+      return () => clearTimeout(timer);
+    }
+  }, [onLoadingComplete, typewriterCompleted]);
+
+  // TypewriterEffect tamamlandığında çağrılacak
+  const handleTypewriterComplete = () => {
+    setTypewriterCompleted(true);
+  };
 
   const containerVariants = {
     exit: {
@@ -169,7 +147,24 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                   <div className="relative flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
                     <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      <TypewriterEffect text="www.burakkexe.dev" />
+                      <Typewriter
+                        options={{
+                          autoStart: false,
+                          loop: false,
+                          delay: 200,
+                          deleteSpeed: 100,
+                          cursor: '|',
+                        }}
+                        onInit={(typewriter) => {
+                          typewriter
+                            .typeString('www.burakcankorpinar.dev')
+                            .callFunction(() => {
+                              // Typewriter tamamlandığında hemen callback'i çağır
+                              handleTypewriterComplete();
+                            })
+                            .start();
+                        }}
+                      />
                     </span>
                   </div>
                 </a>

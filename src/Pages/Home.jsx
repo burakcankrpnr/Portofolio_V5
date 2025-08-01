@@ -80,7 +80,7 @@ const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
 const WORDS = ["Full-Stack Geliştirici", "Web ve Mobil Çözümler", "Teknoloji Tutkunu"];
-const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind", "MySQL"];
+const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind", "MySQL", "TypeScript", "Next.js", "Express.js", "MongoDB", "PostgreSQL", "Docker", "HTML"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/burakcankrpnr" },
   { icon: Linkedin, link: "https://www.linkedin.com/in/burakcankorpinar/" },

@@ -54,11 +54,11 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id }) => {
                   onClick={handleLiveDemo}
                   className="inline-flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-200"
                 >
-                  <span className="text-sm font-medium">Demo</span>
+                  <span className="text-sm font-medium">Web Sitesi  </span>
                   <ExternalLink className="w-4 h-4" />
                 </a>
               ) : (
-                <span className="text-gray-500 text-sm">Demo Mevcut Değil</span>
+                <span className="text-gray-500 text-sm">Web Sitesi Mevcut Değil</span>
               )}
             </div>
           </div>

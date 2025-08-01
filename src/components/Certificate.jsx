@@ -126,6 +126,14 @@ const myWebsites = [
       "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
     Link: "https://www.accvalo.shop/",
   },
+  {
+    id: 3,
+    Title: "Hesap Durağı",
+    Img: "./Adsız.png",
+    Description:
+      "Hesap Durağı - Türkiye'nin en güvenilir oyun hesabı alışveriş platformu. Profesyonel hesaplar, güvenli ödeme sistemi ve 7/24 müşteri desteği.",
+    Link: "https://www.hesapduragi.com/",
+  },
 ];
 
 // Technical skills

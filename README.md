@@ -4,7 +4,7 @@ Here’s the translation of your text to English:
 
 # Portfolio V5  
 Hello everyone!  
-Let me introduce myself, I’m Eki Zulfar Rachman. On this occasion, I’d like to share the portfolio website project that I’ve developed.  
+Let me introduce myself, I'm Eki Zulfar Rachman. On this occasion, I'd like to share the portfolio website project that I've developed.  
 
 **Tech Stack used:**  
 - ReactJS  
@@ -15,6 +15,7 @@ Let me introduce myself, I’m Eki Zulfar Rachman. On this occasion, I’d like 
 - Lucide  
 - Material UI  
 - SweetAlert2  
+- Nodemailer (SMTP Mail)
 
 **Website Link:**  
 [https://www.eki.my.id/](https://www.eki.my.id/)  
@@ -25,7 +26,7 @@ We would appreciate it if you decide to use this project. Please include credit 
 
 # Tutorial: Running the Project  
 
-Here’s a simple guide to run this project.  
+Here's a simple guide to run this project.  
 
 ## Prerequisites  
 
@@ -53,13 +54,30 @@ Ensure that you have already installed:
    npm install --legacy-peer-deps  
    ```  
 
-3. **Run the project:**  
+3. **Configure SMTP Mail Settings:**
+
+   **Gmail Uygulama Şifresi Alma:**
+   - Gmail hesabınıza giriş yapın
+   - [Google Hesap Ayarları](https://myaccount.google.com/)'na gidin
+   - Güvenlik > 2 Adımlı Doğrulama'yı açın
+   - Uygulama Şifreleri > Diğer > Özel ad girin (örn: Portfolio)
+   - Oluşturulan 16 haneli şifreyi kopyalayın
+
+   **Environment Variables:**
+   - `env.example` dosyasını `.env` olarak kopyalayın
+   - Gmail adresinizi ve uygulama şifrenizi girin:
+   ```
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-16-digit-app-password
+   ```
+
+4. **Run the project:**  
 
    ```bash  
    npm run dev  
    ```  
 
-4. **Open in browser:**  
+5. **Open in browser:**  
 
    Access the application through the link displayed in your terminal.  
 
@@ -79,12 +97,27 @@ To create a production-ready build:
 
 ---
 
+## Deployment (Vercel)
+
+1. **Vercel'e deploy edin:**
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+2. **Environment Variables'ları Vercel'de ayarlayın:**
+   - Vercel Dashboard > Project Settings > Environment Variables
+   - `EMAIL_USER` ve `EMAIL_PASS` değerlerini ekleyin
+
+---
+
 ## Notes  
 
 If you encounter issues while running the project, ensure that:  
 - Node.js is correctly installed.  
-- You’re in the correct project directory.  
+- You're in the correct project directory.  
 - All dependencies are installed without errors.  
+- SMTP mail ayarları doğru yapılandırılmış.
 
 ---
 

@@ -150,8 +150,8 @@ const AboutPage = () => {
   }, []);
 
   // İstediğiniz sabit değerler
-  const totalCertificates = 0;  // sertifikalar
-  const YearExperience = 2;     // yıllık deneyim
+  const totalCertificates = 1;  // sertifikalar
+  const YearExperience = 5;     // yıllık deneyim
 
   // Stat verilerini memo ile saklıyoruz
   const statsData = useMemo(() => [
@@ -216,7 +216,7 @@ const AboutPage = () => {
   Mehmet Akif Ersoy Üniversitesi'nde Bilgisayar Mühendisliği eğitimi aldım ve Full Stack Developer olarak çalışıyorum. 
   JavaScript, React.js, Node.js ve CSS gibi teknolojilerde uzmanlaşarak, ölçeklenebilir ve performans odaklı yazılım 
   çözümleri geliştiriyorum. Sürekli öğrenme ve mesleki gelişime büyük önem veriyor, en yeni teknolojileri takip ederek 
-  projelerime entegre ediyorum. Desird Design Arge ve Acc Studio'da edindiğim deneyimler sayesinde, yenilikçi yaklaşımlar 
+  projelerime entegre ediyorum. Desird Design Arge, Acc Studio, Creamake E-Ticaret Ajansı'nda edindiğim deneyimler sayesinde, yenilikçi yaklaşımlar 
   benimseyerek yüksek kaliteli yazılım ürünleri oluşturmayı hedefliyorum.
 </p>
 

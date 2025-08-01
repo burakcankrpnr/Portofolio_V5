@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import SwipeableViews from "react-swipeable-views";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
@@ -122,6 +126,14 @@ const myWebsites = [
       "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
     Link: "https://www.accvalo.shop/",
   },
+  {
+    id: 3,
+    Title: "Hesap Durağı",
+    Img: "./Adsız.png",
+      Description:
+        "Hesap Durağı - Türkiye'nin en güvenilir oyun hesabı alışveriş platformu. Profesyonel hesaplar, güvenli ödeme sistemi ve 7/24 müşteri desteği.",
+    Link: "https://www.hesapduragi.com/",
+  },
 ];
 
 // Teknik Yeterlilikler
@@ -141,6 +153,7 @@ const techStacks = [
 export default function FullWidthTabs() {
   const theme = useTheme();
   const [value, setValue] = useState(0);
+  const [swiperRef, setSwiperRef] = useState(null);
 
   // GitHub projeleri
   const [githubProjects, setGithubProjects] = useState([]);
@@ -217,6 +230,13 @@ ${repo.description || "Açıklama girilmemiş."}
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    if (swiperRef) {
+      swiperRef.slideTo(newValue);
+    }
+  };
+
+  const handleSlideChange = (swiper) => {
+    setValue(swiper.activeIndex);
   };
 
   // Gösterilecek GitHub proje sayısı
@@ -350,121 +370,136 @@ ${repo.description || "Açıklama girilmemiş."}
           </Tabs>
         </AppBar>
 
-        <SwipeableViews
-          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-          index={value}
-          onChangeIndex={setValue}
+        <Swiper
+          slidesPerView={1}
+          spaceBetween={30}
+          loop={false}
+          allowTouchMove={true}
+          onSwiper={setSwiperRef}
+          onSlideChange={handleSlideChange}
+          modules={[Pagination, Navigation]}
+          className="mySwiper"
+          style={{
+            '--swiper-pagination-color': 'transparent',
+            '--swiper-navigation-color': 'transparent',
+          }}
         >
           {/* TAB 0: Web Sitelerim */}
-          <TabPanel value={value} index={0} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {myWebsites.map((website, index) => (
-                  <div
-                    key={website.id}
-                    data-aos={
-                      index % 3 === 0
-                        ? "fade-up-right"
-                        : index % 3 === 1
-                        ? "fade-up"
-                        : "fade-up-left"
-                    }
-                    data-aos-duration={
-                      index % 3 === 0
-                        ? "1000"
-                        : index % 3 === 1
-                        ? "1200"
-                        : "1000"
-                    }
-                  >
-                    <CardProject
-                      Img={website.Img}
-                      Title={website.Title}
-                      Description={website.Description}
-                      Link={website.Link}
-                      id={website.id}
-                    />
-                  </div>
-                ))}
+          <SwiperSlide>
+            <TabPanel value={value} index={0} dir={theme.direction}>
+              <div className="container mx-auto flex justify-center items-center overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+                  {myWebsites.map((website, index) => (
+                    <div
+                      key={website.id}
+                      data-aos={
+                        index % 3 === 0
+                          ? "fade-up-right"
+                          : index % 3 === 1
+                          ? "fade-up"
+                          : "fade-up-left"
+                      }
+                      data-aos-duration={
+                        index % 3 === 0
+                          ? "1000"
+                          : index % 3 === 1
+                          ? "1200"
+                          : "1000"
+                      }
+                    >
+                      <CardProject
+                        Img={website.Img}
+                        Title={website.Title}
+                        Description={website.Description}
+                        Link={website.Link}
+                        id={website.id}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </TabPanel>
+            </TabPanel>
+          </SwiperSlide>
 
           {/* TAB 1: Projelerim (GitHub Projeleri) */}
-          <TabPanel value={value} index={1} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {displayedGithubProjects.map((repo, index) => (
-                  <div
-                    key={repo.id}
-                    data-aos={
-                      index % 3 === 0
-                        ? "fade-up-right"
-                        : index % 3 === 1
-                        ? "fade-up"
-                        : "fade-up-left"
-                    }
-                    data-aos-duration={
-                      index % 3 === 0
-                        ? "1000"
-                        : index % 3 === 1
-                        ? "1200"
-                        : "1000"
-                    }
-                  >
-                    <CardProject
-                      Img={repo.Img} // Ortak GitHub placeholder resmi
-                      Title={repo.Title}
-                      Description={repo.Description}
-                      Link={repo.Link}
-                      id={repo.id}
-                    />
-                  </div>
-                ))}
+          <SwiperSlide>
+            <TabPanel value={value} index={1} dir={theme.direction}>
+              <div className="container mx-auto flex justify-center items-center overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+                  {displayedGithubProjects.map((repo, index) => (
+                    <div
+                      key={repo.id}
+                      data-aos={
+                        index % 3 === 0
+                          ? "fade-up-right"
+                          : index % 3 === 1
+                          ? "fade-up"
+                          : "fade-up-left"
+                      }
+                      data-aos-duration={
+                        index % 3 === 0
+                          ? "1000"
+                          : index % 3 === 1
+                          ? "1200"
+                          : "1000"
+                      }
+                    >
+                      <CardProject
+                        Img={repo.Img} // Ortak GitHub placeholder resmi
+                        Title={repo.Title}
+                        Description={repo.Description}
+                        Link={repo.Link}
+                        id={repo.id}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            {githubProjects.length > initialItems && (
-              <div className="mt-6 w-full flex justify-start">
-                <ToggleButton
-                  onClick={toggleShowMore}
-                  isShowingMore={showAllGithubProjects}
-                />
-              </div>
-            )}
-          </TabPanel>
+              {githubProjects.length > initialItems && (
+                <div className="mt-6 w-full flex justify-start">
+                  <ToggleButton
+                    onClick={toggleShowMore}
+                    isShowingMore={showAllGithubProjects}
+                  />
+                </div>
+              )}
+            </TabPanel>
+          </SwiperSlide>
 
           {/* TAB 2: Yetkinliklerim */}
-          <TabPanel value={value} index={2} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
-                {techStacks.map((stack, index) => (
-                  <div
-                    key={index}
-                    data-aos={
-                      index % 3 === 0
-                        ? "fade-up-right"
-                        : index % 3 === 1
-                        ? "fade-up"
-                        : "fade-up-left"
-                    }
-                    data-aos-duration={
-                      index % 3 === 0
-                        ? "1000"
-                        : index % 3 === 1
-                        ? "1200"
-                        : "1000"
-                    }
-                  >
-                    <TechStackIcon
-                      TechStackIcon={stack.icon}
-                      Language={stack.language}
-                    />
-                  </div>
-                ))}
+          <SwiperSlide>
+            <TabPanel value={value} index={2} dir={theme.direction}>
+              <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
+                  {techStacks.map((stack, index) => (
+                    <div
+                      key={index}
+                      data-aos={
+                        index % 3 === 0
+                          ? "fade-up-right"
+                          : index % 3 === 1
+                          ? "fade-up"
+                          : "fade-up-left"
+                      }
+                      data-aos-duration={
+                        index % 3 === 0
+                          ? "1000"
+                          : index % 3 === 1
+                          ? "1200"
+                          : "1000"
+                      }
+                    >
+                      <TechStackIcon
+                        TechStackIcon={stack.icon}
+                        Language={stack.language}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </TabPanel>
-        </SwipeableViews>
+            </TabPanel>
+          </SwiperSlide>
+        </Swiper>
       </Box>
     </div>
   );
