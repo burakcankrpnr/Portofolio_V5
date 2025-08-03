@@ -117,23 +117,7 @@ const myWebsites = [
     Description:
       "100'den fazla günlük aktif kullanıcı için modern bir topluluk etkileşim deneyimi sağlamayı amaçlayan tam özellikli bir web platformu geliştirildi. Veri korumasını ve oturum güvenliğini garanti altına alarak güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliğini, profil ayrıntılarını ve performans ölçümlerini gösteren modüler bir gösterge paneli tasarlandı. Optimum kullanıcı deneyimi için React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu bir kullanıcı arayüzü oluşturuldu.",
     Link: "https://habbotpd.com/",
-  },
-  {
-    id: 2,
-    Title: "AccValo.Shop",
-    Img: "./valo3.png",
-    Description:
-      "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
-    Link: "https://www.accvalo.shop/",
-  },
-  {
-    id: 3,
-    Title: "Hesap Durağı",
-    Img: "./Adsız.png",
-      Description:
-        "Hesap Durağı - Türkiye'nin en güvenilir oyun hesabı alışveriş platformu. Profesyonel hesaplar, güvenli ödeme sistemi ve 7/24 müşteri desteği.",
-    Link: "https://www.hesapduragi.com/",
-  },
+  }
 ];
 
 // Teknik Yeterlilikler
@@ -349,23 +333,23 @@ ${repo.description || "Açıklama girilmemiş."}
               },
             }}
           >
-            {/* Tab 1: Web Sitelerim */}
-            <Tab
+            {/* Tab 1: Web Sitelerim - YORUMDA */}
+            {/* <Tab
               icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
               label="Web Sitelerim"
               {...a11yProps(0)}
-            />
-            {/* Tab 2: Projelerim (GitHub) */}
+            /> */}
+            {/* Tab 1: Projelerim (GitHub) */}
             <Tab
               icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
               label="Projelerim"
-              {...a11yProps(1)}
+              {...a11yProps(0)}
             />
-            {/* Tab 3: Yetkinliklerim */}
+            {/* Tab 2: Yetkinliklerim */}
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
               label="Yetkinliklerim"
-              {...a11yProps(2)}
+              {...a11yProps(1)}
             />
           </Tabs>
         </AppBar>
@@ -384,8 +368,8 @@ ${repo.description || "Açıklama girilmemiş."}
             '--swiper-navigation-color': 'transparent',
           }}
         >
-          {/* TAB 0: Web Sitelerim */}
-          <SwiperSlide>
+          {/* TAB 0: Web Sitelerim - YORUMDA */}
+          {/* <SwiperSlide>
             <TabPanel value={value} index={0} dir={theme.direction}>
               <div className="container mx-auto flex justify-center items-center overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
@@ -419,11 +403,11 @@ ${repo.description || "Açıklama girilmemiş."}
                 </div>
               </div>
             </TabPanel>
-          </SwiperSlide>
+          </SwiperSlide> */}
 
-          {/* TAB 1: Projelerim (GitHub Projeleri) */}
+          {/* TAB 0: Projelerim (GitHub Projeleri) */}
           <SwiperSlide>
-            <TabPanel value={value} index={1} dir={theme.direction}>
+            <TabPanel value={value} index={0} dir={theme.direction}>
               <div className="container mx-auto flex justify-center items-center overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
                   {displayedGithubProjects.map((repo, index) => (
@@ -466,9 +450,9 @@ ${repo.description || "Açıklama girilmemiş."}
             </TabPanel>
           </SwiperSlide>
 
-          {/* TAB 2: Yetkinliklerim */}
+          {/* TAB 1: Yetkinliklerim */}
           <SwiperSlide>
-            <TabPanel value={value} index={2} dir={theme.direction}>
+            <TabPanel value={value} index={1} dir={theme.direction}>
               <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
                   {techStacks.map((stack, index) => (

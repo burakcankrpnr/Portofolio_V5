@@ -117,23 +117,7 @@ const myWebsites = [
     Description:
       "100'den fazla günlük aktif kullanıcı için modern bir topluluk etkileşim deneyimi sağlamayı amaçlayan tam özellikli bir web platformu geliştirildi. Veri korumasını ve oturum güvenliğini garanti altına alarak güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliğini, profil ayrıntılarını ve performans ölçümlerini gösteren modüler bir gösterge paneli tasarlandı. Optimum kullanıcı deneyimi için React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu bir kullanıcı arayüzü oluşturuldu.",
     Link: "https://habbotpd.com/",
-  },
-  {
-    id: 2,
-    Title: "AccValo.Shop",
-    Img: "./valo3.png",
-    Description:
-      "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
-    Link: "https://www.accvalo.shop/",
-  },
-  {
-    id: 3,
-    Title: "Hesap Durağı",
-    Img: "./Adsız.png",
-    Description:
-      "Hesap Durağı - Türkiye'nin en güvenilir oyun hesabı alışveriş platformu. Profesyonel hesaplar, güvenli ödeme sistemi ve 7/24 müşteri desteği.",
-    Link: "https://www.hesapduragi.com/",
-  },
+  }
 ];
 
 // Technical skills
