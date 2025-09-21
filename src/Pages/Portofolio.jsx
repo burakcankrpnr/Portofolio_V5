@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation } from 'swiper/modules';
@@ -15,7 +15,7 @@ import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { Code, Boxes } from "lucide-react";
+import { Boxes, Award } from "lucide-react";
 
 
 function TabPanel({ children, value, index, ...other }) {
@@ -264,10 +264,10 @@ export default function FullWidthTabs() {
               },
             }}
           >
-            {/* Tab 1: Web Sitelerim */}
+            {/* Tab 1: Projelerim (GitHub) */}
             <Tab
-              icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Web Sitelerim"
+              icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
+              label="Projelerim"
               {...a11yProps(0)}
             />
             {/* Tab 2: Yetkinliklerim */}
@@ -293,7 +293,45 @@ export default function FullWidthTabs() {
             '--swiper-navigation-color': 'transparent',
           }}
         >
-          {/* TAB 0: Web Sitelerim */}
+          {/* TAB 0: Web Sitelerim - YORUMDA */}
+          {/* <SwiperSlide>
+            <TabPanel value={value} index={0} dir={theme.direction}>
+              <div className="container mx-auto flex justify-center items-center overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+                  {myWebsites.map((website, index) => (
+                    <div
+                      key={website.id}
+                      data-aos={
+                        index % 3 === 0
+                          ? "fade-up-right"
+                          : index % 3 === 1
+                          ? "fade-up"
+                          : "fade-up-left"
+                      }
+                      data-aos-duration={
+                        index % 3 === 0
+                          ? "1000"
+                          : index % 3 === 1
+                          ? "1200"
+                          : "1000"
+                      }
+                    >
+                      <CardProject
+                        Img={website.Img}
+                        Title={website.Title}
+                        Description={website.Description}
+                        Link={website.Link}
+                        id={website.id}
+                        Company={website.Company}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabPanel>
+          </SwiperSlide> */}
+
+          {/* TAB 0: Projelerim (GitHub Projeleri) */}
           <SwiperSlide>
             <TabPanel value={value} index={0} dir={theme.direction}>
               <div className="container mx-auto flex justify-center items-center overflow-hidden">

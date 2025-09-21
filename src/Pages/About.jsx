@@ -222,7 +222,7 @@ const AboutPage = () => {
 
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">
-              <a
+              {/* <a
                 href="https://drive.google.com/file/d/1on0iIxn5Cq9YfC5GmlzTCiheLeWLjExe/view?usp=drive_link"
                 className="w-full lg:w-auto"
               >
@@ -242,7 +242,7 @@ const AboutPage = () => {
                 >
                   <Code className="w-4 h-4 sm:w-5 sm:h-5" /> Projeleri Görüntüle
                 </button>
-              </a>
+              </a> */}
             </div>
           </div>
 
