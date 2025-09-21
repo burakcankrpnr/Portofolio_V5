@@ -1,0 +1,12 @@
+services:
+  frontend:
+    image: burakcankorpinar/web
+    build:
+      context: .
+      no_cache: true
+      dockerfile: Dockerfile
+    container_name: www.burakcankorpinar.dev
+    hostname: www.burakcankorpinar.dev
+    restart: always
+    ports:
+      - "5005:5173"

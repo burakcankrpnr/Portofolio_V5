@@ -9,7 +9,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        host: true, // Tüm network interface'lerini dinle
+        port: 5173,
+        allowedHosts: true
       }
     }
   }
