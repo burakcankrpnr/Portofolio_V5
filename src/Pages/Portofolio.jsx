@@ -15,66 +15,8 @@ import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { Code, Award, Boxes } from "lucide-react";
+import { Code, Boxes } from "lucide-react";
 
-// Ortak GitHub proje görseli (varsayılan placeholder)
-const GITHUB_PLACEHOLDER_IMG =
-  "https://www.bleepstatic.com/content/hl-images/2022/04/08/GitHub__headpic.jpg";
-
-// Show More / Show Less butonu
-const ToggleButton = ({ onClick, isShowingMore }) => (
-  <button
-    onClick={onClick}
-    className="
-      px-3 py-1.5
-      text-slate-300 
-      hover:text-white 
-      text-sm 
-      font-medium 
-      transition-all 
-      duration-300 
-      ease-in-out
-      flex 
-      items-center 
-      gap-2
-      bg-white/5 
-      hover:bg-white/10
-      rounded-md
-      border 
-      border-white/10
-      hover:border-white/20
-      backdrop-blur-sm
-      group
-      relative
-      overflow-hidden
-    "
-  >
-    <span className="relative z-10 flex items-center gap-2">
-      {isShowingMore ? "See Less" : "See More"}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={`
-          transition-transform 
-          duration-300 
-          ${isShowingMore ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"}
-        `}
-      >
-        <polyline
-          points={isShowingMore ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}
-        ></polyline>
-      </svg>
-    </span>
-    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-500/50 transition-all duration-300 group-hover:w-full"></span>
-  </button>
-);
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -112,27 +54,73 @@ function a11yProps(index) {
 const myWebsites = [
   {
     id: 1,
-    Title: "HabboTPD",
+    Title: "Habbo TPD Website",
     Img: "./tpdgiris.png",
+    Company: "Acc Studio",
     Description:
-      "100'den fazla günlük aktif kullanıcı için modern bir topluluk etkileşim deneyimi sağlamayı amaçlayan tam özellikli bir web platformu geliştirildi. Veri korumasını ve oturum güvenliğini garanti altına alarak güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliğini, profil ayrıntılarını ve performans ölçümlerini gösteren modüler bir gösterge paneli tasarlandı. Optimum kullanıcı deneyimi için React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu bir kullanıcı arayüzü oluşturuldu.",
+      "Professional Community Platform - 100+ günlük aktif kullanıcı için modern topluluk etkileşim deneyimi sağlayan tam özellikli web platformu. Güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliği, profil ayrıntıları ve performans ölçümlerini gösteren modüler dashboard tasarlandı. React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu UI oluşturuldu.",
     Link: "https://habbotpd.com/",
   },
+  // {
+  //   id: 2,
+  //   Title: "AccValo.Shop",
+  //   Img: "./valo3.png",
+  //   Description:
+  //     "E-Commerce Platform - Valorant hesaplarını güvenli bir şekilde alıp satmak için tasarlanmış full-stack web uygulaması. Node.js ve Express.js kullanarak RESTful API'ler geliştirildi, ürün ve kullanıcı yönetimi için MySQL entegrasyonu yapıldı. JWT tabanlı kimlik doğrulama ile modern, duyarlı React frontend'i oluşturuldu.",
+  //   Link: "https://www.accvalo.shop/",
+  // },
+  // {
+  //   id: 3,
+  //   Title: "Hesap Durağı",
+  //   Img: "./Adsız.png",
+  //   Description:
+  //     "E-Commerce Platform - Dijital ürünleri güvenli bir şekilde alıp satmak için geliştirilmiş ölçeklenebilir e-ticaret platformu. Node.js ve Express.js ile RESTful API'ler tasarlandı ve uygulandı, ürün, sipariş ve kullanıcı yönetimi için MySQL entegrasyonu yapıldı. Güvenli ödeme sistemleri entegre edildi ve güvenilirlik ve kullanıcı güveni sağlamak için ödeme süreçleri optimize edildi.",
+  //   Link: "https://hesapduragi.com/",
+  // },
   {
     id: 2,
-    Title: "AccValo.Shop",
-    Img: "./valo3.png",
+    Title: "Orbis Med Clinics",
+    Img: "./orbis.png",
+    Company: "Creamake E-Ticaret Ajansı",
     Description:
-      "AccValo.Shop - Önde gelen global Valorant hesap ve skin satış platformu. Güvenli, hızlı alışveriş ve 7/24 canlı destek!",
-    Link: "https://www.accvalo.shop/",
+      "Dental Clinic Website - Türkçe, İngilizce ve Almanca içerikle çok dilli kurumsal site geliştirildi. Dinamik tedavi paketleri, fiyatlandırma ve teklif/rezervasyon iş akışları uygulandı. Güvenli iletişim ve rezervasyon formları ile duyarlı, kullanıcı dostu UI/UX teslim edildi. Cloudflare kullanarak performans ve güvenlik optimize edildi.",
+    Link: "https://orbismedclinics.com/",
   },
   {
     id: 3,
-    Title: "Hesap Durağı",
-    Img: "./Adsız.png",
-      Description:
-        "Hesap Durağı - Türkiye'nin en güvenilir oyun hesabı alışveriş platformu. Profesyonel hesaplar, güvenli ödeme sistemi ve 7/24 müşteri desteği.",
-    Link: "https://www.hesapduragi.com/",
+    Title: "Base of Influencer",
+    Img: "./boi.png",
+    Company: "Creamake E-Ticaret Ajansı",
+    Description:
+      "Influencer Marketing Platform - Markalar ve influencer'ları sorunsuz kampanya yönetimi için bağlayan tam özellikli platform geliştirildi. Kampanya oluşturma, başvuru takibi, içerik onayı ve ödeme iş akışları uygulandı. Web ve mobil platformlarda tutarlı deneyim sağlayan duyarlı ve mobil uyumlu UI tasarlandı. Modern web teknolojileri kullanarak güvenli kimlik doğrulama ve kullanıcı yönetimi ile ölçeklenebilir backend oluşturuldu.",
+    Link: "https://baseofinfluencer.com/",
+  },
+  {
+    id: 4,
+    Title: "Base of Influencer App",
+    Img: "./boiapp.png",
+    Company: "Creamake E-Ticaret Ajansı",
+    Description:
+      "Influencer Marketing Mobile App - Base of Influencer platformunun mobil uygulaması olarak geliştirildi. Kampanya yönetimi, influencer bağlantıları ve içerik takibi için optimize edilmiş mobil deneyim sunar. Cross-platform uyumluluk ile iOS ve Android cihazlarda sorunsuz çalışır. Push notification, gerçek zamanlı bildirimler ve offline çalışma özellikleri ile kullanıcı deneyimi geliştirildi.",
+    Link: "https://app.baseofinfluencer.com/",
+  },
+  {
+    id: 5,
+    Title: "Acc Studio",
+    Img: "./accstudio.co.png",
+    Company: "Acc Studio",
+    Description:
+      "Creative Agency Platform - Yaratıcı ajans hizmetleri sunan modern web platformu geliştirildi. Tasarım, marka kimliği ve dijital pazarlama çözümleri için kapsamlı hizmet portföyü sunuldu. Kullanıcı dostu arayüz ile portfolyo sergileme ve hizmet tanıtımı yapıldı. Responsive tasarım ve modern web teknolojileri kullanılarak profesyonel bir dijital varlık oluşturuldu.",
+    Link: "https://accstudio.co/",
+  },
+  {
+    id: 6,
+    Title: "Home London Breeze",
+    Img: "./hml.png",
+    Company: "Creamake E-Ticaret Ajansı",
+    Description:
+      "Shopify E-Commerce Platform - Lüks moda ve yaşam tarzı ürünleri sunan Shopify tabanlı e-ticaret platformu geliştirildi. Dinamik ürün kategorileri, filtreleme ve arama işlevselliği ile özel Shopify Liquid teması oluşturuldu. Sorunsuz alışveriş deneyimleri için duyarlı ve mobil uyumlu UI tasarlandı. Shopify admin paneli aracılığıyla içerik ve ürün yönetimi verimli bir şekilde gerçekleştirildi.",
+    Link: "https://homelondonbreeze.com/",
   },
 ];
 
@@ -155,26 +143,6 @@ export default function FullWidthTabs() {
   const [value, setValue] = useState(0);
   const [swiperRef, setSwiperRef] = useState(null);
 
-  // GitHub projeleri
-  const [githubProjects, setGithubProjects] = useState([]);
-
-  // GitHub projelerinde "See More" özelliği
-  const [showAllGithubProjects, setShowAllGithubProjects] = useState(false);
-
-  // Ekran genişliği (mobil mi değil mi) - render sonrası hesaplıyoruz
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize(); // ilk açılışta çalıştır
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Başlangıçta kaç proje gösterilsin?
-  const initialItems = isMobile ? 4 : 6;
 
   // AOS başlat
   useEffect(() => {
@@ -183,50 +151,6 @@ export default function FullWidthTabs() {
     });
   }, []);
 
-  // GitHub projelerini çekme fonksiyonu
-  const fetchGithubProjects = useCallback(async () => {
-    try {
-      const response = await fetch(
-        "https://api.github.com/users/burakcankrpnr/repos"
-      );
-      const data = await response.json();
-
-      // Mümkün olan en fazla bilgiyi alarak "Description" alanına ekliyoruz
-      const formattedRepos = data.map((repo) => {
-        // Repo'ya ait ek bilgileri Description içine gömüyoruz.
-        const combinedDesc = `
-${repo.description || "Açıklama girilmemiş."}
-
-• Dil (Language): ${repo.language || "Belirtilmemiş"}
-• Yıldız (Stars): ${repo.stargazers_count}
-• Forks: ${repo.forks_count}
-• Watchers: ${repo.watchers_count}
-• Open Issues: ${repo.open_issues_count}
-• Lisans: ${repo.license?.spdx_id || "Lisans yok"}
-• Topics: ${repo.topics?.join(", ") || "—"}
-• Anasayfa (Homepage): ${repo.homepage || "Yok"}
-• Oluşturulma (Created): ${repo.created_at}
-• Güncellenme (Updated): ${repo.updated_at}
-        `.trim();
-
-        return {
-          id: repo.id,
-          Title: repo.name,
-          Description: combinedDesc,
-          Img: GITHUB_PLACEHOLDER_IMG, // Ortak GitHub placeholder resmi
-          Link: repo.html_url,
-        };
-      });
-      setGithubProjects(formattedRepos);
-    } catch (error) {
-      console.error("Error fetching GitHub projects:", error);
-    }
-  }, []);
-
-  // component yüklendiğinde GitHub verilerini çek
-  useEffect(() => {
-    fetchGithubProjects();
-  }, [fetchGithubProjects]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -239,15 +163,6 @@ ${repo.description || "Açıklama girilmemiş."}
     setValue(swiper.activeIndex);
   };
 
-  // Gösterilecek GitHub proje sayısı
-  const displayedGithubProjects = showAllGithubProjects
-    ? githubProjects
-    : githubProjects.slice(0, initialItems);
-
-  // ShowMore/ShowLess fonksiyonu
-  const toggleShowMore = useCallback(() => {
-    setShowAllGithubProjects((prev) => !prev);
-  }, []);
 
   return (
     <div
@@ -355,17 +270,11 @@ ${repo.description || "Açıklama girilmemiş."}
               label="Web Sitelerim"
               {...a11yProps(0)}
             />
-            {/* Tab 2: Projelerim (GitHub) */}
-            <Tab
-              icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
-              label="Projelerim"
-              {...a11yProps(1)}
-            />
-            {/* Tab 3: Yetkinliklerim */}
+            {/* Tab 2: Yetkinliklerim */}
             <Tab
               icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
               label="Yetkinliklerim"
-              {...a11yProps(2)}
+              {...a11yProps(1)}
             />
           </Tabs>
         </AppBar>
@@ -413,6 +322,7 @@ ${repo.description || "Açıklama girilmemiş."}
                         Description={website.Description}
                         Link={website.Link}
                         id={website.id}
+                        Company={website.Company}
                       />
                     </div>
                   ))}
@@ -421,54 +331,9 @@ ${repo.description || "Açıklama girilmemiş."}
             </TabPanel>
           </SwiperSlide>
 
-          {/* TAB 1: Projelerim (GitHub Projeleri) */}
+          {/* TAB 1: Yetkinliklerim */}
           <SwiperSlide>
             <TabPanel value={value} index={1} dir={theme.direction}>
-              <div className="container mx-auto flex justify-center items-center overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                  {displayedGithubProjects.map((repo, index) => (
-                    <div
-                      key={repo.id}
-                      data-aos={
-                        index % 3 === 0
-                          ? "fade-up-right"
-                          : index % 3 === 1
-                          ? "fade-up"
-                          : "fade-up-left"
-                      }
-                      data-aos-duration={
-                        index % 3 === 0
-                          ? "1000"
-                          : index % 3 === 1
-                          ? "1200"
-                          : "1000"
-                      }
-                    >
-                      <CardProject
-                        Img={repo.Img} // Ortak GitHub placeholder resmi
-                        Title={repo.Title}
-                        Description={repo.Description}
-                        Link={repo.Link}
-                        id={repo.id}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {githubProjects.length > initialItems && (
-                <div className="mt-6 w-full flex justify-start">
-                  <ToggleButton
-                    onClick={toggleShowMore}
-                    isShowingMore={showAllGithubProjects}
-                  />
-                </div>
-              )}
-            </TabPanel>
-          </SwiperSlide>
-
-          {/* TAB 2: Yetkinliklerim */}
-          <SwiperSlide>
-            <TabPanel value={value} index={2} dir={theme.direction}>
               <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
                   {techStacks.map((stack, index) => (

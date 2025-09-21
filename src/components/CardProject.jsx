@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 
-const CardProject = ({ Img, Title, Description, Link: ProjectLink, id }) => {
+const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Handle kasus ketika ProjectLink kosong
   const handleLiveDemo = (e) => {
     if (!ProjectLink) {
@@ -19,6 +21,13 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id }) => {
       alert("Proje detayları mevcut değil.");
     }
   };
+
+  // Açıklamayı kısalt
+  const maxLength = 120;
+  const shouldTruncate = Description.length > maxLength;
+  const displayText = isExpanded || !shouldTruncate 
+    ? Description 
+    : Description.substring(0, maxLength) + "...";
   
 
   return (
@@ -36,16 +45,43 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id }) => {
             />
           </div>
           
-          <div className="mt-4 space-y-3">
-            <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
-              {Title}
-            </h3>
-            
-            <p className="text-gray-300/80 text-sm leading-relaxed line-clamp-2">
-              {Description}
-            </p>
+           <div className="mt-4 space-y-3">
+             <div>
+               <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                 {Title}
+               </h3>
+               {Company && (
+                 <p className="text-sm text-gray-400 mt-1">
+                   <span className="text-gray-500">Geliştirildiği Yer:</span> {Company}
+                 </p>
+               )}
+             </div>
+             
+             <div className="space-y-2">
+              <p className="text-gray-300/80 text-sm leading-relaxed">
+                {displayText}
+              </p>
+            </div>
             
             <div className="pt-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {shouldTruncate && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors duration-200 group/btn"
+                  >
+                    <span>
+                      {isExpanded ? "Daha Az Göster" : "Devamını Oku"}
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp className="w-3 h-3 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 group-hover/btn:translate-y-0.5 transition-transform duration-200" />
+                    )}
+                  </button>
+                )}
+              </div>
+              
               {ProjectLink ? (
                 <a
                 href={ProjectLink || "#"}

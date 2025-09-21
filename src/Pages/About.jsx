@@ -216,7 +216,7 @@ const AboutPage = () => {
   Mehmet Akif Ersoy Üniversitesi'nde Bilgisayar Mühendisliği eğitimi aldım ve Full Stack Developer olarak çalışıyorum. 
   JavaScript, React.js, Node.js ve CSS gibi teknolojilerde uzmanlaşarak, ölçeklenebilir ve performans odaklı yazılım 
   çözümleri geliştiriyorum. Sürekli öğrenme ve mesleki gelişime büyük önem veriyor, en yeni teknolojileri takip ederek 
-  projelerime entegre ediyorum. Desird Design Arge, Acc Studio, Creamake E-Ticaret Ajansı'nda edindiğim deneyimler sayesinde, yenilikçi yaklaşımlar 
+  projelerime entegre ediyorum. <a href="https://desird.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200">Desird Design Arge</a>, <a href="https://accstudio.co/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200">Acc Studio</a> ve <a href="https://creamake.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200">Creamake E-Ticaret Ajansı</a>'nda edindiğim deneyimler sayesinde, yenilikçi yaklaşımlar 
   benimseyerek yüksek kaliteli yazılım ürünleri oluşturmayı hedefliyorum.
 </p>
 

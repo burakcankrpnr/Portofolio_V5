@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Code2, Github, Globe, User } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import Typewriter from 'typewriter-effect';
+import PropTypes from 'prop-types';
 
 const BackgroundEffect = () => (
   <div className="absolute inset-0 overflow-hidden">
@@ -21,9 +21,15 @@ const IconButton = ({ Icon }) => (
   </div>
 );
 
+IconButton.propTypes = {
+  Icon: PropTypes.elementType.isRequired,
+};
+
 const WelcomeScreen = ({ onLoadingComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [typewriterCompleted, setTypewriterCompleted] = useState(false);
+  const [displayText, setDisplayText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     AOS.init({
@@ -31,24 +37,38 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       once: false,
       mirror: false,
     });
+  }, []);
 
-    // TypewriterEffect tamamlandıktan sonra sayfa açılsın
+  // Typewriter efekti için ayrı useEffect
+  useEffect(() => {
+    const targetText = 'www.burakcankorpinar.dev';
+    
+    if (currentIndex < targetText.length) {
+      const timer = setTimeout(() => {
+        setDisplayText(targetText.substring(0, currentIndex + 1));
+        setCurrentIndex(prev => prev + 1);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (currentIndex === targetText.length && !typewriterCompleted) {
+      // Typewriter tamamlandı
+      setTypewriterCompleted(true);
+    }
+  }, [currentIndex, typewriterCompleted]);
+
+  // TypewriterEffect tamamlandıktan sonra sayfa açılsın
+  useEffect(() => {
     if (typewriterCompleted) {
       const timer = setTimeout(() => {
         setIsLoading(false);
         setTimeout(() => {
           onLoadingComplete?.();
         }, 1000);
-      }, 500); // TypewriterEffect tamamlandıktan sonra 500ms bekle
+      }, 3000); // TypewriterEffect tamamlandıktan sonra 3 saniye bekle
       
       return () => clearTimeout(timer);
     }
-  }, [onLoadingComplete, typewriterCompleted]);
+  }, [typewriterCompleted, onLoadingComplete]);
 
-  // TypewriterEffect tamamlandığında çağrılacak
-  const handleTypewriterComplete = () => {
-    setTypewriterCompleted(true);
-  };
 
   const containerVariants = {
     exit: {
@@ -147,34 +167,23 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                   <div className="relative flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
                     <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                     <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      <Typewriter
-                        options={{
-                          autoStart: false,
-                          loop: false,
-                          delay: 200,
-                          deleteSpeed: 100,
-                          cursor: '|',
-                        }}
-                        onInit={(typewriter) => {
-                          typewriter
-                            .typeString('www.burakcankorpinar.dev')
-                            .callFunction(() => {
-                              // Typewriter tamamlandığında hemen callback'i çağır
-                              handleTypewriterComplete();
-                            })
-                            .start();
-                        }}
-                      />
+                      {displayText}
+                      <span className="animate-pulse">|</span>
                     </span>
                   </div>
                 </a>
               </motion.div>
+
             </div>
           </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
+};
+
+WelcomeScreen.propTypes = {
+  onLoadingComplete: PropTypes.func,
 };
 
 export default WelcomeScreen;
