@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         GITHUB_CREDENTIAL = 'github-access-token'
-        GITHUB_URL = "https://${GITHUB_CREDENTIAL}@github.com/burakcankrpnr/acc-studio.git"
+        GITHUB_URL = "https://${GITHUB_CREDENTIAL}@github.com/burakcankrpnr/Portofolio_V5.git"
         GITHUB_BRANCH = 'main'
     }
 
