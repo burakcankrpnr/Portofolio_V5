@@ -8,11 +8,25 @@ export default defineConfig({
     host: true, // Tüm network interface'lerini dinle
     port: 5173,
     allowedHosts: true,
+    hmr: {
+      port: 5173,
+      host: 'localhost'
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
       }
     }
   }

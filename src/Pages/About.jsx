@@ -197,14 +197,7 @@ const AboutPage = () => {
               data-aos-duration="1000"
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
-                Merhaba, Ben
-              </span>
-              <span 
-                className="block mt-2 text-gray-200"
-                data-aos="fade-right"
-                data-aos-duration="1300"
-              >
-                Burak Can Körpınar
+                Hakkımda
               </span>
             </h2>
             
