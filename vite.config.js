@@ -10,7 +10,8 @@ export default defineConfig({
     allowedHosts: true,
     hmr: {
       port: 5173,
-      host: 'localhost'
+      host: 'localhost',
+      protocol: 'ws'
     },
     proxy: {
       '/api': {
@@ -29,5 +30,9 @@ export default defineConfig({
         manualChunks: undefined
       }
     }
+  },
+  preview: {
+    port: 4173,
+    host: true
   }
 })
