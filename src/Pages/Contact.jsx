@@ -79,9 +79,10 @@ const ContactPage = () => {
   };
 
   return (
-    <>
+    <section aria-labelledby="contact-heading">
       <div className="text-center lg:mt-[5%] mt-10 mb-2 sm:px-0 px-[5%]">
         <h2
+          id="contact-heading"
           data-aos="fade-down"
           data-aos-duration="1000"
           className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
@@ -212,7 +213,7 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
-    </>
+    </section>
   );
 };
 

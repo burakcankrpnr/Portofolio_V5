@@ -122,6 +122,15 @@ const myWebsites = [
       "Shopify E-Commerce Platform - Lüks moda ve yaşam tarzı ürünleri sunan Shopify tabanlı e-ticaret platformu geliştirildi. Dinamik ürün kategorileri, filtreleme ve arama işlevselliği ile özel Shopify Liquid teması oluşturuldu. Sorunsuz alışveriş deneyimleri için duyarlı ve mobil uyumlu UI tasarlandı. Shopify admin paneli aracılığıyla içerik ve ürün yönetimi verimli bir şekilde gerçekleştirildi.",
     Link: "https://homelondonbreeze.com/",
   },
+  {
+    id: 7,
+    Title: "Psikolog Emine Yıldırım",
+    Img: "./emineyildirim.png",
+    Company:"Acc Studio",
+    Description:
+      "Online psikolojik danışmanlık hizmetlerini tanıtan, özel olarak geliştirilmiş kurumsal bir web sitesi. Güven veren ve sade bir arayüz, randevu odaklı bilgi mimarisi ve mobil uyumlu tasarım ile kullanıcı deneyimi ön planda tutuldu. Hızlı sayfa geçişleri, SEO uyumlu yapı ve kolay güncellenebilir içerik altyapısı ile markanın dijital görünürlüğü güçlendirildi.",
+    Link: "https://psikologemineyildirim.com/",
+  },
 ];
 
 // Teknik Yeterlilikler
@@ -165,9 +174,10 @@ export default function FullWidthTabs() {
 
 
   return (
-    <div
+    <section
       className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden"
       id="Portofolio"
+      aria-labelledby="portfolio-heading"
     >
       {/* Başlık */}
       <div
@@ -176,6 +186,7 @@ export default function FullWidthTabs() {
         data-aos-duration="1000"
       >
         <h2
+          id="portfolio-heading"
           className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
           style={{
             color: "#6366f1",
@@ -404,6 +415,6 @@ export default function FullWidthTabs() {
           </SwiperSlide>
         </Swiper>
       </Box>
-    </div>
+    </section>
   );
 }

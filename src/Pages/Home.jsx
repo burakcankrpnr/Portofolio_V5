@@ -149,7 +149,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030014] overflow-hidden" id="Home">
+    <section className="min-h-screen bg-[#030014] overflow-hidden" id="Home" aria-labelledby="home-heading">
       <div className={`relative z-10 transition-all duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}>
         <div className="container mx-auto px-[5%] sm:px-6 lg:px-[0%] min-h-screen pt-20 sm:pt-0">
           <div className="flex flex-col lg:flex-row items-center justify-center h-screen md:justify-between gap-0 sm:gap-12 lg:gap-20">
@@ -161,7 +161,9 @@ const Home = () => {
             >
               <div className="space-y-4 sm:space-y-6">
                 <StatusBadge />
-                <MainTitle />
+                <div id="home-heading">
+                  <MainTitle />
+                </div>
                 {/* Typing Effect */}
                 <div className="h-8 flex items-center" data-aos="fade-up" data-aos-delay="800">
                   <span className="text-xl md:text-2xl bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent font-light">
@@ -233,7 +235,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
