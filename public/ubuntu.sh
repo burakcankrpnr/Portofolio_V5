@@ -268,13 +268,6 @@ mkdir -p /var/www
 cat > /var/www/index.php <<EOL
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Welcome to $user_domain</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        h1 { color: #333; }
-    </style>
-</head>
 <body>
     <h1>Selamat Datang di Server $user_domain</h1>
     <?php phpinfo(); ?>
