@@ -13,7 +13,7 @@ const socialLinks = [
     displayName: "Bağlantı Kuralım",
     subText: "LinkedIn'de",
     icon: Linkedin,
-    url: "https://www.linkedin.com/in/ekizr/",
+    url: "https://www.linkedin.com/in/burakcankorpinar/",
     color: "#0A66C2",
     gradient: "from-[#0A66C2] to-[#0077B5]",
     isPrimary: true

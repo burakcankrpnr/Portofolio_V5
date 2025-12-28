@@ -138,8 +138,8 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
     Siteme
   </span>
 </div>
-<div>
-  <span data-aos="fade-up" data-aos-delay="800" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+<div className="leading-relaxed">
+  <span data-aos="fade-up" data-aos-delay="800" className="inline-block px-2 pb-2 leading-[1.6] bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
     Hoş
   </span>{' '}
   <span data-aos="fade-up" data-aos-delay="1000" className="inline-block px-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
