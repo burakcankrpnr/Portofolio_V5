@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+
+const SITE_ORIGIN = "https://burakcankorpinar.dev";
+
+const NAV_LINKS = [
+    { hash: "#Home", label: "Ana Sayfa" },
+    { hash: "#About", label: "Hakkımda" },
+    { hash: "#Portofolio", label: "Portfolyom" },
+    { hash: "#Contact", label: "İletişim" },
+].map(({ hash, label }) => ({
+    hash,
+    label,
+    href: `${SITE_ORIGIN}/#${hash.slice(1)}`,
+}));
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("Home");
-    
-    const navItems = [
-        { href: "#Home", label: "Ana Sayfa" },
-        { href: "#About", label: "Hakkımda" },
-        { href: "#Portofolio", label: "Portfolyom" },
-        { href: "#Contact", label: "İletişim" },
-    ];
 
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
-            const sections = navItems.map(item => {
-                const section = document.querySelector(item.href);
+            const sections = NAV_LINKS.map((item) => {
+                const section = document.querySelector(item.hash);
                 if (section) {
                     return {
-                        id: item.href.replace("#", ""),
+                        id: item.hash.replace("#", ""),
                         offset: section.offsetTop - 550,
                         height: section.offsetHeight
                     };
@@ -52,9 +58,9 @@ const Navbar = () => {
         }
     }, [isOpen]);
 
-    const scrollToSection = (e, href) => {
+    const scrollToSection = (e, hash) => {
         e.preventDefault();
-        const section = document.querySelector(href);
+        const section = document.querySelector(hash);
         if (section) {
             const top = section.offsetTop - 100;
             window.scrollTo({
@@ -80,7 +86,7 @@ const Navbar = () => {
                 {/* Logo */}
                 <div className="flex-shrink-0">
                     <a
-                        href="#Home"
+                        href={`${SITE_ORIGIN}/#Home`}
                         onClick={(e) => scrollToSection(e, "#Home")}
                         className="text-xl font-bold bg-gradient-to-r from-[#a855f7] to-[#6366f1] bg-clip-text text-transparent"
                     >
@@ -91,16 +97,16 @@ const Navbar = () => {
                 {/* Desktop Navigation */}
                 <div className="hidden md:block">
                     <div className="ml-8 flex items-center space-x-8">
-                        {navItems.map((item) => (
+                        {NAV_LINKS.map((item) => (
                             <a
                                 key={item.label}
                                 href={item.href}
-                                onClick={(e) => scrollToSection(e, item.href)}
+                                onClick={(e) => scrollToSection(e, item.hash)}
                                 className="group relative px-1 py-2 text-sm font-medium"
                             >
                                 <span
                                     className={`relative z-10 transition-colors duration-300 ${
-                                        activeSection === item.href.substring(1)
+                                        activeSection === item.hash.slice(1)
                                             ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
                                             : "text-[#e2d3fd] group-hover:text-white"
                                     }`}
@@ -109,7 +115,7 @@ const Navbar = () => {
                                 </span>
                                 <span
                                     className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] transform origin-left transition-transform duration-300 ${
-                                        activeSection === item.href.substring(1)
+                                        activeSection === item.hash.slice(1)
                                             ? "scale-x-100"
                                             : "scale-x-0 group-hover:scale-x-100"
                                     }`}
@@ -148,13 +154,13 @@ const Navbar = () => {
         >
             <div className="flex flex-col h-full">
                 <div className="px-4 py-6 space-y-4 flex-1 ">
-                    {navItems.map((item, index) => (
+                    {NAV_LINKS.map((item, index) => (
                         <a
                             key={item.label}
                             href={item.href}
-                            onClick={(e) => scrollToSection(e, item.href)}
+                            onClick={(e) => scrollToSection(e, item.hash)}
                             className={`block px-4 py-3 text-lg font-medium transition-all duration-300 ease ${
-                                activeSection === item.href.substring(1)
+                                activeSection === item.hash.slice(1)
                                     ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
                                     : "text-[#e2d3fd] hover:text-white"
                             }`}

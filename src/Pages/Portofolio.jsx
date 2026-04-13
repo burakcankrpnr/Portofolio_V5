@@ -131,6 +131,15 @@ const myWebsites = [
       "Online psikolojik danışmanlık hizmetlerini tanıtan, özel olarak geliştirilmiş kurumsal bir web sitesi. Güven veren ve sade bir arayüz, randevu odaklı bilgi mimarisi ve mobil uyumlu tasarım ile kullanıcı deneyimi ön planda tutuldu. Hızlı sayfa geçişleri, SEO uyumlu yapı ve kolay güncellenebilir içerik altyapısı ile markanın dijital görünürlüğü güçlendirildi.",
     Link: "https://psikologemineyildirim.com/",
   },
+  {
+    id: 8,
+    Title: "Akdeniz Konsept",
+    Img: "./akdeniz-konsept.png",
+    Company: "Acc Studio",
+    Description:
+      "Mimarlık ve iç mimarlık firması için kurumsal web sitesi. İç ve dış mimari hizmetlerini vurgulayan çift panelli ana görsel, çok dilli yapı ve siyah–beyaz minimalist arayüz ile markanın profesyonel kimliği yansıtıldı. Duyarlı tasarım ve net bilgi mimarisi ile projeler, referanslar ve iletişim akışları kullanıcı odaklı şekilde sunuldu.",
+    Link: "https://akdenizkonsept.com/",
+  },
 ];
 
 // Teknik Yeterlilikler

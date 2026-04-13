@@ -1,5 +1,18 @@
 {
   "version": 2,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.burakcankorpinar.dev"
+        }
+      ],
+      "destination": "https://burakcankorpinar.dev/:path*",
+      "permanent": true
+    }
+  ],
   "builds": [
     {
       "src": "package.json",
