@@ -21,3 +21,9 @@ node_modules
 *.sln
 *.sw?
 .vercel
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production

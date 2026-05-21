@@ -30,9 +30,9 @@ const socialLinks = [
   {
     name: "Email",
     displayName: "E-posta",
-    subText: "burakcan07@icloud.com",
+    subText: "burikcankorpinar@gmail.com",
     icon: Mail,
-    url: "mailto:burakcan07@icloud.com",
+    url: "mailto:burikcankorpinar@gmail.com",
     color: "#EA4335",
     gradient: "from-[#EA4335] to-[#D93025]"
   },

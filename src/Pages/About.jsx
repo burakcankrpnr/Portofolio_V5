@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo, useMemo } from "react"
+import React, { useEffect, memo, useMemo } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
@@ -113,8 +113,8 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 ));
 
 const AboutPage = () => {
-  // GitHub repo sayısını tutmak için state
-  const [projectCount, setProjectCount] = useState(0);
+  // Proje sayısı (Portföy bölümündeki projelerle eşleşir)
+  const projectCount = 7;
 
   // AOS initialization
   useEffect(() => {
@@ -133,25 +133,9 @@ const AboutPage = () => {
     };
   }, []);
 
-  // GitHub'dan proje sayısı çekme
-  useEffect(() => {
-    // Kullanıcı adınızı buraya yazın:
-    const username = "burakcankrpnr";
-    fetch(`https://api.github.com/users/${username}/repos`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setProjectCount(data.length);
-        }
-      })
-      .catch(err => {
-        console.error("GitHub projeleri alınırken hata:", err);
-      });
-  }, []);
-
   // İstediğiniz sabit değerler
-  const totalCertificates = 1;  // sertifikalar
-  const YearExperience = 5;     // yıllık deneyim
+  const totalCertificates = 4;  // sertifikalar
+  const YearExperience = 6;     // yıllık deneyim
 
   // Stat verilerini memo ile saklıyoruz
   const statsData = useMemo(() => [

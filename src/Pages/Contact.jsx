@@ -139,7 +139,9 @@ const ContactPage = () => {
             >
               {/* FormSubmit Configuration */}
               <input type="hidden" name="_template" value="table" />
-              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_captcha" value="true" />
+              <input type="hidden" name="_next" value="https://burakcankorpinar.dev/" />
+              <input type="hidden" name="_subject" value="New Contact Form Message" />
 
               <div
                 data-aos="fade-up"

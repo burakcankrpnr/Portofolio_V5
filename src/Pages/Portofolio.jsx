@@ -52,15 +52,15 @@ function a11yProps(index) {
 
 // Web Siteleri
 const myWebsites = [
-  {
-    id: 1,
-    Title: "Habbo TPD Website",
-    Img: "./tpdgiris.png",
-    Company: "Acc Studio",
-    Description:
-      "Professional Community Platform - 100+ günlük aktif kullanıcı için modern topluluk etkileşim deneyimi sağlayan tam özellikli web platformu. Güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliği, profil ayrıntıları ve performans ölçümlerini gösteren modüler dashboard tasarlandı. React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu UI oluşturuldu.",
-    Link: "https://habbotpd.com/",
-  },
+  // {
+  //   id: 1,
+  //   Title: "Habbo TPD Website",
+  //   Img: "./tpdgiris.png",
+  //   Company: "Acc Studio",
+  //   Description:
+  //     "Professional Community Platform - 100+ günlük aktif kullanıcı için modern topluluk etkileşim deneyimi sağlayan tam özellikli web platformu. Güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliği, profil ayrıntıları ve performans ölçümlerini gösteren modüler dashboard tasarlandı. React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu UI oluşturuldu.",
+  //   Link: "https://habbotpd.com/",
+  // },
   // {
   //   id: 2,
   //   Title: "AccValo.Shop",
@@ -77,14 +77,50 @@ const myWebsites = [
   //     "E-Commerce Platform - Dijital ürünleri güvenli bir şekilde alıp satmak için geliştirilmiş ölçeklenebilir e-ticaret platformu. Node.js ve Express.js ile RESTful API'ler tasarlandı ve uygulandı, ürün, sipariş ve kullanıcı yönetimi için MySQL entegrasyonu yapıldı. Güvenli ödeme sistemleri entegre edildi ve güvenilirlik ve kullanıcı güveni sağlamak için ödeme süreçleri optimize edildi.",
   //   Link: "https://hesapduragi.com/",
   // },
+  // {
+  //   id: 2,
+  //   Title: "Orbis Med Clinics",
+  //   Img: "./orbis.png",
+  //   Company: "Creamake E-Ticaret Ajansı",
+  //   Description:
+  //     "Dental Clinic Website - Türkçe, İngilizce ve Almanca içerikle çok dilli kurumsal site geliştirildi. Dinamik tedavi paketleri, fiyatlandırma ve teklif/rezervasyon iş akışları uygulandı. Güvenli iletişim ve rezervasyon formları ile duyarlı, kullanıcı dostu UI/UX teslim edildi. Cloudflare kullanarak performans ve güvenlik optimize edildi.",
+  //   Link: "https://orbismedclinics.com/",
+  // },
   {
-    id: 2,
-    Title: "Orbis Med Clinics",
-    Img: "./orbis.png",
-    Company: "Creamake E-Ticaret Ajansı",
+    id: 5,
+    Title: "Acc Studio",
+    Img: "./accstudio.co.png",
+    Company: "Acc Studio",
     Description:
-      "Dental Clinic Website - Türkçe, İngilizce ve Almanca içerikle çok dilli kurumsal site geliştirildi. Dinamik tedavi paketleri, fiyatlandırma ve teklif/rezervasyon iş akışları uygulandı. Güvenli iletişim ve rezervasyon formları ile duyarlı, kullanıcı dostu UI/UX teslim edildi. Cloudflare kullanarak performans ve güvenlik optimize edildi.",
-    Link: "https://orbismedclinics.com/",
+      "Creative Agency Platform - Yaratıcı ajans hizmetleri sunan modern web platformu geliştirildi. Tasarım, marka kimliği ve dijital pazarlama çözümleri için kapsamlı hizmet portföyü sunuldu. Kullanıcı dostu arayüz ile portfolyo sergileme ve hizmet tanıtımı yapıldı. Responsive tasarım ve modern web teknolojileri kullanılarak profesyonel bir dijital varlık oluşturuldu.",
+    Link: "https://accstudio.co/",
+  },
+  {
+    id: 7,
+    Title: "Psikolog Emine Yıldırım",
+    Img: "./emineyildirim.png",
+    Company:"Acc Studio",
+    Description:
+      "Online psikolojik danışmanlık hizmetlerini tanıtan, özel olarak geliştirilmiş kurumsal bir web sitesi. Güven veren ve sade bir arayüz, randevu odaklı bilgi mimarisi ve mobil uyumlu tasarım ile kullanıcı deneyimi ön planda tutuldu. Hızlı sayfa geçişleri, SEO uyumlu yapı ve kolay güncellenebilir içerik altyapısı ile markanın dijital görünürlüğü güçlendirildi.",
+    Link: "https://psikologemineyildirim.com/",
+  },
+  {
+    id: 8,
+    Title: "Akdeniz Konsept",
+    Img: "./akdeniz-konsept.png",
+    Company: "Acc Studio",
+    Description:
+      "Mimarlık ve iç mimarlık firması için kurumsal web sitesi. İç ve dış mimari hizmetlerini vurgulayan çift panelli ana görsel, çok dilli yapı ve siyah–beyaz minimalist arayüz ile markanın profesyonel kimliği yansıtıldı. Duyarlı tasarım ve net bilgi mimarisi ile projeler, referanslar ve iletişim akışları kullanıcı odaklı şekilde sunuldu.",
+    Link: "https://akdenizkonsept.com/",
+  },
+  {
+    id: 9,
+    Title: "Mercado Plastik",
+    Img: "./mercadologo-01.png",
+    Company: "Acc Studio",
+    Description:
+      "Plastik sektöründe kaliteli ürün ve hizmet sunan Mercado Plastik için kurumsal web sitesi. Modern ve kullanıcı dostu arayüz ile firmanın ürün yelpazesi, hizmetleri ve iletişim bilgileri etkili bir şekilde sergilendi. Responsive tasarım ve SEO uyumlu yapı ile dijital görünürlük güçlendirildi.",
+    Link: "https://mercadoplastik.com/",
   },
   {
     id: 3,
@@ -105,15 +141,6 @@ const myWebsites = [
     Link: "https://app.baseofinfluencer.com/",
   },
   {
-    id: 5,
-    Title: "Acc Studio",
-    Img: "./accstudio.co.png",
-    Company: "Acc Studio",
-    Description:
-      "Creative Agency Platform - Yaratıcı ajans hizmetleri sunan modern web platformu geliştirildi. Tasarım, marka kimliği ve dijital pazarlama çözümleri için kapsamlı hizmet portföyü sunuldu. Kullanıcı dostu arayüz ile portfolyo sergileme ve hizmet tanıtımı yapıldı. Responsive tasarım ve modern web teknolojileri kullanılarak profesyonel bir dijital varlık oluşturuldu.",
-    Link: "https://accstudio.co/",
-  },
-  {
     id: 6,
     Title: "Home London Breeze",
     Img: "./hml.png",
@@ -122,35 +149,31 @@ const myWebsites = [
       "Shopify E-Commerce Platform - Lüks moda ve yaşam tarzı ürünleri sunan Shopify tabanlı e-ticaret platformu geliştirildi. Dinamik ürün kategorileri, filtreleme ve arama işlevselliği ile özel Shopify Liquid teması oluşturuldu. Sorunsuz alışveriş deneyimleri için duyarlı ve mobil uyumlu UI tasarlandı. Shopify admin paneli aracılığıyla içerik ve ürün yönetimi verimli bir şekilde gerçekleştirildi.",
     Link: "https://homelondonbreeze.com/",
   },
-  {
-    id: 7,
-    Title: "Psikolog Emine Yıldırım",
-    Img: "./emineyildirim.png",
-    Company:"Acc Studio",
-    Description:
-      "Online psikolojik danışmanlık hizmetlerini tanıtan, özel olarak geliştirilmiş kurumsal bir web sitesi. Güven veren ve sade bir arayüz, randevu odaklı bilgi mimarisi ve mobil uyumlu tasarım ile kullanıcı deneyimi ön planda tutuldu. Hızlı sayfa geçişleri, SEO uyumlu yapı ve kolay güncellenebilir içerik altyapısı ile markanın dijital görünürlüğü güçlendirildi.",
-    Link: "https://psikologemineyildirim.com/",
-  },
-  {
-    id: 8,
-    Title: "Akdeniz Konsept",
-    Img: "./akdeniz-konsept.png",
-    Company: "Acc Studio",
-    Description:
-      "Mimarlık ve iç mimarlık firması için kurumsal web sitesi. İç ve dış mimari hizmetlerini vurgulayan çift panelli ana görsel, çok dilli yapı ve siyah–beyaz minimalist arayüz ile markanın profesyonel kimliği yansıtıldı. Duyarlı tasarım ve net bilgi mimarisi ile projeler, referanslar ve iletişim akışları kullanıcı odaklı şekilde sunuldu.",
-    Link: "https://akdenizkonsept.com/",
-  },
 ];
 
 // Teknik Yeterlilikler
 const techStacks = [
-  { icon: "html.svg", language: "HTML" },
-  { icon: "css.svg", language: "CSS" },
+  { icon: "reactjs.svg", language: "React.js" },
+  { icon: "nodejs.svg", language: "Node.js" },
+  { icon: "typescript.svg", language: "TypeScript" },
   { icon: "javascript.svg", language: "JavaScript" },
+  { icon: "scss.svg", language: "SCSS" },
+  { icon: "vuejs.svg", language: "Vue.js" },
+  { icon: "html.svg", language: "HTML5" },
+  { icon: "css.svg", language: "CSS" },
+  { icon: "nextjs.svg", language: "Next.js" },
+  { icon: "sass.svg", language: "SASS" },
+  { icon: "mysql.svg", language: "MySQL" },
+  { icon: "docker.svg", language: "Docker" },
+  { icon: "git.svg", language: "Git" },
+  { icon: "python.svg", language: "Python" },
   { icon: "tailwind.svg", language: "Tailwind CSS" },
-  { icon: "reactjs.svg", language: "ReactJS" },
+  { icon: "prisma.svg", language: "Prisma ORM" },
+  { icon: "mongodb.svg", language: "MongoDB" },
+  { icon: "wordpress.svg", language: "WordPress" },
+  { icon: "socketio.svg", language: "Socket.IO" },
+  { icon: "graphql.svg", language: "GraphQL" },
   { icon: "vite.svg", language: "Vite" },
-  { icon: "nodejs.svg", language: "Node JS" },
   { icon: "bootstrap.svg", language: "Bootstrap" },
   { icon: "MUI.svg", language: "Material UI" },
   { icon: "vercel.svg", language: "Vercel" },

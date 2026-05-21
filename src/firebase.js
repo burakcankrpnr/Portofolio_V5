@@ -1,9 +1,13 @@
+// NOTE: Firebase client config is public by design (API keys are exposed in client-side apps).
+// Firestore Security Rules MUST be configured in Firebase Console to restrict access.
+// Do NOT put sensitive data or secrets in client-side Firebase config.
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore"
-import { collection, addDoc, getDocs } from "@firebase/firestore"; // Perbarui ini
+import { collection, addDoc, getDocs } from "@firebase/firestore";
 
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB-lfUt1adpQ0KYcFFW_oAWTJVfHDOOZy8",
   authDomain: "portofolio-web-3e8e8.firebaseapp.com",

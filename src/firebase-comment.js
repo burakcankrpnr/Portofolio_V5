@@ -1,3 +1,7 @@
+// NOTE: Firebase client config is public by design.
+// Firestore Security Rules and Storage Rules MUST be configured in Firebase Console.
+// Comment system must validate/sanitize user input via Security Rules.
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
