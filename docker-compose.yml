@@ -1,0 +1,29 @@
+services:
+  frontend:
+    image: accvalo/Portofolio_v5
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: www.burakcankorpinar.dev
+    hostname: www.burakcankorpinar.dev
+    restart: always
+    ports:
+      - "32008:80"
+
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=50M
+      - /var/cache/nginx:noexec,nosuid,size=50M
+      - /var/run:noexec,nosuid,size=10M
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
