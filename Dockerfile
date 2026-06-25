@@ -1,22 +1,47 @@
-FROM node:20-alpine AS build
-EXPOSE 5173
+FROM node:latest
 
-RUN npm config set loglevel verbose --global
-RUN apk add build-base cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev
-RUN apk add --no-cache libc6-compat
+# Gerekli kütüphaneleri yükle (OpenSSL ve diğer bağımlılıklar)
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
+# Package files
+COPY package*.json ./
+COPY prisma ./prisma
+
+# Install ALL dependencies (legacy-peer-deps ile dependency conflict çözülüyor)
+RUN npm install --legacy-peer-deps
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Copy source
 COPY . .
-RUN npm install
+
+# Build-time environment variables (geçici değerler, runtime'da override edilecek)
+# Bu değerler sadece build için, runtime'da docker-compose.yml'den gerçek değerler gelecek
+ARG NEXTAUTH_SECRET=BUILD_TIME_PLACEHOLDER_DO_NOT_USE_IN_PRODUCTION
+ARG NEXTAUTH_URL=http://localhost:3000
+ENV NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+ENV NEXTAUTH_URL=${NEXTAUTH_URL}
+
+# Build the application (NODE_ENV production for build)
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
-FROM node:20-alpine AS production
-RUN apk add --no-cache libc6-compat
-RUN npm install -g serve
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nodejs
-USER nodejs
-EXPOSE 5173
-CMD ["serve", "-s", "dist", "-l", "5173"]
+# Copy and make entrypoint executable
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
+# Production port
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Use entrypoint script
+CMD ["./docker-entrypoint.sh"]
