@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: accvalo/Portofolio_v5
+    image: accvalo/portofolio-v5
     build:
       context: .
       dockerfile: Dockerfile
