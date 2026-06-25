@@ -20,4 +20,6 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
   CMD wget -q --spider http://localhost/ || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+# read_only ortamda entrypoint script'lerinin config dosyasını değiştirmesini önler
+ENTRYPOINT ["nginx"]
+CMD ["-g", "daemon off;"]
