@@ -50,47 +50,50 @@ function a11yProps(index) {
   };
 }
 
+const COMPANY_LINKS = {
+  stylingPark: "https://stylingpark.com/",
+  accStudio: "https://accstudio.co/",
+  creamake: "https://creamake.com/",
+};
+
 // Web Siteleri
 const myWebsites = [
-  // {
-  //   id: 1,
-  //   Title: "Habbo TPD Website",
-  //   Img: "./tpdgiris.png",
-  //   Company: "Acc Studio",
-  //   Description:
-  //     "Professional Community Platform - 100+ günlük aktif kullanıcı için modern topluluk etkileşim deneyimi sağlayan tam özellikli web platformu. Güvenli kullanıcı kimlik doğrulaması (JWT/OAuth 2.0) uygulandı. Kullanıcı etkinliği, profil ayrıntıları ve performans ölçümlerini gösteren modüler dashboard tasarlandı. React, Tailwind CSS ve Node.js kullanarak koyu/açık mod seçeneklerine sahip duyarlı ve mobil uyumlu UI oluşturuldu.",
-  //   Link: "https://habbotpd.com/",
-  // },
-  // {
-  //   id: 2,
-  //   Title: "AccValo.Shop",
-  //   Img: "./valo3.png",
-  //   Description:
-  //     "E-Commerce Platform - Valorant hesaplarını güvenli bir şekilde alıp satmak için tasarlanmış full-stack web uygulaması. Node.js ve Express.js kullanarak RESTful API'ler geliştirildi, ürün ve kullanıcı yönetimi için MySQL entegrasyonu yapıldı. JWT tabanlı kimlik doğrulama ile modern, duyarlı React frontend'i oluşturuldu.",
-  //   Link: "https://www.accvalo.shop/",
-  // },
-  // {
-  //   id: 3,
-  //   Title: "Hesap Durağı",
-  //   Img: "./Adsız.png",
-  //   Description:
-  //     "E-Commerce Platform - Dijital ürünleri güvenli bir şekilde alıp satmak için geliştirilmiş ölçeklenebilir e-ticaret platformu. Node.js ve Express.js ile RESTful API'ler tasarlandı ve uygulandı, ürün, sipariş ve kullanıcı yönetimi için MySQL entegrasyonu yapıldı. Güvenli ödeme sistemleri entegre edildi ve güvenilirlik ve kullanıcı güveni sağlamak için ödeme süreçleri optimize edildi.",
-  //   Link: "https://hesapduragi.com/",
-  // },
-  // {
-  //   id: 2,
-  //   Title: "Orbis Med Clinics",
-  //   Img: "./orbis.png",
-  //   Company: "Creamake E-Ticaret Ajansı",
-  //   Description:
-  //     "Dental Clinic Website - Türkçe, İngilizce ve Almanca içerikle çok dilli kurumsal site geliştirildi. Dinamik tedavi paketleri, fiyatlandırma ve teklif/rezervasyon iş akışları uygulandı. Güvenli iletişim ve rezervasyon formları ile duyarlı, kullanıcı dostu UI/UX teslim edildi. Cloudflare kullanarak performans ve güvenlik optimize edildi.",
-  //   Link: "https://orbismedclinics.com/",
-  // },
+  {
+    id: 10,
+    Title: "StylingPark",
+    Img: "./stylingpark.png",
+    Company: "StylingPark",
+    CompanyLink: COMPANY_LINKS.stylingPark,
+    Description:
+      "Moda E-Ticaret Platformu - Trend elbise, abiye ve stil ürünlerini sunan modern e-ticaret sitesi geliştirildi. Kategori odaklı gezinti, kampanya vitrinleri ve mobil uyumlu alışveriş akışı ile kullanıcı deneyimi güçlendirildi. Performans ve dönüşüm odaklı arayüz ile markanın dijital mağaza kimliği oluşturuldu.",
+    Link: "https://stylingpark.com/",
+  },
+  {
+    id: 11,
+    Title: "Mavelone",
+    Img: "./stylingpark.png",
+    Company: "StylingPark",
+    CompanyLink: COMPANY_LINKS.stylingPark,
+    Description:
+      "Kurumsal / marka web platformu - StylingPark bünyesinde geliştirilen Mavelone için modern, duyarlı ve SEO uyumlu bir web deneyimi sunuldu. Net bilgi mimarisi, hızlı sayfa yüklemeleri ve mobil öncelikli arayüz ile markanın dijital varlığı güçlendirildi.",
+    Link: "https://mavelone.com/",
+  },
+  {
+    id: 12,
+    Title: "HabboPÖH",
+    Img: "./accstudio.co.png",
+    Company: "Acc Studio",
+    CompanyLink: COMPANY_LINKS.accStudio,
+    Description:
+      "Habbo Topluluk Platformu - Habbo Polis Özel Harekât (PÖH) için oda takibi, rozet mağazası, rütbe sistemi ve şirket paneli içeren tam özellikli web platformu. Motto doğrulamalı kayıt, Discord entegrasyonu ve yönetim paneli ile topluluk operasyonları tek çatı altında toplandı.",
+    Link: "https://habbopoh.com/",
+  },
   {
     id: 5,
     Title: "Acc Studio",
     Img: "./accstudio.co.png",
     Company: "Acc Studio",
+    CompanyLink: COMPANY_LINKS.accStudio,
     Description:
       "Creative Agency Platform - Yaratıcı ajans hizmetleri sunan modern web platformu geliştirildi. Tasarım, marka kimliği ve dijital pazarlama çözümleri için kapsamlı hizmet portföyü sunuldu. Kullanıcı dostu arayüz ile portfolyo sergileme ve hizmet tanıtımı yapıldı. Responsive tasarım ve modern web teknolojileri kullanılarak profesyonel bir dijital varlık oluşturuldu.",
     Link: "https://accstudio.co/",
@@ -99,7 +102,8 @@ const myWebsites = [
     id: 7,
     Title: "Psikolog Emine Yıldırım",
     Img: "./emineyildirim.png",
-    Company:"Acc Studio",
+    Company: "Acc Studio",
+    CompanyLink: COMPANY_LINKS.accStudio,
     Description:
       "Online psikolojik danışmanlık hizmetlerini tanıtan, özel olarak geliştirilmiş kurumsal bir web sitesi. Güven veren ve sade bir arayüz, randevu odaklı bilgi mimarisi ve mobil uyumlu tasarım ile kullanıcı deneyimi ön planda tutuldu. Hızlı sayfa geçişleri, SEO uyumlu yapı ve kolay güncellenebilir içerik altyapısı ile markanın dijital görünürlüğü güçlendirildi.",
     Link: "https://psikologemineyildirim.com/",
@@ -109,6 +113,7 @@ const myWebsites = [
     Title: "Akdeniz Konsept",
     Img: "./akdeniz-konsept.png",
     Company: "Acc Studio",
+    CompanyLink: COMPANY_LINKS.accStudio,
     Description:
       "Mimarlık ve iç mimarlık firması için kurumsal web sitesi. İç ve dış mimari hizmetlerini vurgulayan çift panelli ana görsel, çok dilli yapı ve siyah–beyaz minimalist arayüz ile markanın profesyonel kimliği yansıtıldı. Duyarlı tasarım ve net bilgi mimarisi ile projeler, referanslar ve iletişim akışları kullanıcı odaklı şekilde sunuldu.",
     Link: "https://akdenizkonsept.com/",
@@ -118,6 +123,7 @@ const myWebsites = [
     Title: "Mercado Plastik",
     Img: "./mercadologo-01.png",
     Company: "Acc Studio",
+    CompanyLink: COMPANY_LINKS.accStudio,
     Description:
       "Plastik sektöründe kaliteli ürün ve hizmet sunan Mercado Plastik için kurumsal web sitesi. Modern ve kullanıcı dostu arayüz ile firmanın ürün yelpazesi, hizmetleri ve iletişim bilgileri etkili bir şekilde sergilendi. Responsive tasarım ve SEO uyumlu yapı ile dijital görünürlük güçlendirildi.",
     Link: "https://mercadoplastik.com/",
@@ -127,6 +133,7 @@ const myWebsites = [
     Title: "Base of Influencer",
     Img: "./boi.png",
     Company: "Creamake E-Ticaret Ajansı",
+    CompanyLink: COMPANY_LINKS.creamake,
     Description:
       "Influencer Marketing Platform - Markalar ve influencer'ları sorunsuz kampanya yönetimi için bağlayan tam özellikli platform geliştirildi. Kampanya oluşturma, başvuru takibi, içerik onayı ve ödeme iş akışları uygulandı. Web ve mobil platformlarda tutarlı deneyim sağlayan duyarlı ve mobil uyumlu UI tasarlandı. Modern web teknolojileri kullanarak güvenli kimlik doğrulama ve kullanıcı yönetimi ile ölçeklenebilir backend oluşturuldu.",
     Link: "https://baseofinfluencer.com/",
@@ -136,6 +143,7 @@ const myWebsites = [
     Title: "Base of Influencer App",
     Img: "./boiapp.png",
     Company: "Creamake E-Ticaret Ajansı",
+    CompanyLink: COMPANY_LINKS.creamake,
     Description:
       "Influencer Marketing Mobile App - Base of Influencer platformunun mobil uygulaması olarak geliştirildi. Kampanya yönetimi, influencer bağlantıları ve içerik takibi için optimize edilmiş mobil deneyim sunar. Cross-platform uyumluluk ile iOS ve Android cihazlarda sorunsuz çalışır. Push notification, gerçek zamanlı bildirimler ve offline çalışma özellikleri ile kullanıcı deneyimi geliştirildi.",
     Link: "https://app.baseofinfluencer.com/",
@@ -145,6 +153,7 @@ const myWebsites = [
     Title: "Home London Breeze",
     Img: "./hml.png",
     Company: "Creamake E-Ticaret Ajansı",
+    CompanyLink: COMPANY_LINKS.creamake,
     Description:
       "Shopify E-Commerce Platform - Lüks moda ve yaşam tarzı ürünleri sunan Shopify tabanlı e-ticaret platformu geliştirildi. Dinamik ürün kategorileri, filtreleme ve arama işlevselliği ile özel Shopify Liquid teması oluşturuldu. Sorunsuz alışveriş deneyimleri için duyarlı ve mobil uyumlu UI tasarlandı. Shopify admin paneli aracılığıyla içerik ve ürün yönetimi verimli bir şekilde gerçekleştirildi.",
     Link: "https://homelondonbreeze.com/",
@@ -177,6 +186,11 @@ const techStacks = [
   { icon: "bootstrap.svg", language: "Bootstrap" },
   { icon: "MUI.svg", language: "Material UI" },
   { icon: "vercel.svg", language: "Vercel" },
+  { icon: "googleads.svg", language: "Google Ads" },
+  { icon: "metaads.svg", language: "Meta Ads" },
+  { icon: "trendyol.png", language: "Trendyol Pazaryeri" },
+  { icon: "ikas.png", language: "İkas" },
+  { icon: "shopify.svg", language: "Shopify" },
 ];
 
 export default function FullWidthTabs() {
@@ -207,7 +221,7 @@ export default function FullWidthTabs() {
 
   return (
     <section
-      className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden"
+      className="px-[5%] sm:px-[5%] lg:px-[10%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden"
       id="Portofolio"
       aria-labelledby="portfolio-heading"
     >
@@ -377,11 +391,12 @@ export default function FullWidthTabs() {
           {/* TAB 0: Projelerim (GitHub Projeleri) */}
           <SwiperSlide>
             <TabPanel value={value} index={0} dir={theme.direction}>
-              <div className="container mx-auto flex justify-center items-center overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
+              <div className="w-full overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5 items-stretch">
                   {myWebsites.map((website, index) => (
                     <div
                       key={website.id}
+                      className="h-full"
                       data-aos={
                         index % 3 === 0
                           ? "fade-up-right"
@@ -404,6 +419,7 @@ export default function FullWidthTabs() {
                         Link={website.Link}
                         id={website.id}
                         Company={website.Company}
+                        CompanyLink={website.CompanyLink}
                       />
                     </div>
                   ))}
@@ -415,11 +431,12 @@ export default function FullWidthTabs() {
           {/* TAB 1: Yetkinliklerim */}
           <SwiperSlide>
             <TabPanel value={value} index={1} dir={theme.direction}>
-              <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
+              <div className="w-full overflow-hidden pb-[5%]">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5 items-stretch">
                   {techStacks.map((stack, index) => (
                     <div
                       key={index}
+                      className="h-full"
                       data-aos={
                         index % 3 === 0
                           ? "fade-up-right"

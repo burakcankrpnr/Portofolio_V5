@@ -1,7 +1,7 @@
 {
-  "name": "Burak Can Körpınar Portfolio",
-  "short_name": "BC Portfolio",
-  "description": "Full-Stack Developer Portfolio",
+  "name": "Burak Can Körpınar (burakkexe) Portfolio",
+  "short_name": "burakkexe",
+  "description": "burakkexe — Full-Stack Developer Portfolio",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#030014",
@@ -9,17 +9,22 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/image.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "src": "/favicon-pack/favicon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/image.jpg",
+      "src": "/favicon-pack/favicon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-pack/favicon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
 }
-

@@ -107,6 +107,28 @@ body {
    animation: shine 1.5s ease-in-out infinite;
  }
 
+@keyframes preview-mouse-wheel {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.25;
+    transform: translateY(5px);
+  }
+}
+
+.preview-mouse-wheel {
+  animation: preview-mouse-wheel 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-mouse-wheel {
+    animation: none;
+  }
+}
+
   
 /*   @media (prefers-color-scheme: dark) {
 	::-webkit-scrollbar-track {
