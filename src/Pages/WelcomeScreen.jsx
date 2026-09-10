@@ -31,7 +31,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
   const [typewriterCompleted, setTypewriterCompleted] = useState(false);
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const targetText = 'www.burakcankorpinar.dev';
+  const targetText = 'burakcankorpinar.dev';
 
   useEffect(() => {
     AOS.init({
@@ -170,7 +170,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                 data-aos-delay="2600"
               >
                 <a
-                  href="https://www.burakcankorpinar.dev"
+                  href="https://burakcankorpinar.dev"
                   className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full relative group hover:scale-105 transition-transform duration-300"
                   target="_blank"
                   rel="noopener noreferrer"
