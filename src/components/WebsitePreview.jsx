@@ -9,7 +9,7 @@ const previewFileFromUrl = (url) => {
   }
 };
 
-/** Canlı full-page yakalama (hover scroll için uzun görsel) */
+/** Canlı fssull-page yakalama (hover scroll için uzun görsel) */
 const liveCaptureSources = (url) => [
   `https://image.thum.io/get/fullpage/width/1440/noanimate/wait/3/${url}`,
   `https://mini.s-shot.ru/1440x9000/JPEG/1440/Z80/?${url}`,
