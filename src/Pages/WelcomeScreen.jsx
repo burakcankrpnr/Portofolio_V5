@@ -27,9 +27,11 @@ IconButton.propTypes = {
 
 const WelcomeScreen = ({ onLoadingComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [typewriterStarted, setTypewriterStarted] = useState(false);
   const [typewriterCompleted, setTypewriterCompleted] = useState(false);
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const targetText = 'www.burakcankorpinar.dev';
 
   useEffect(() => {
     AOS.init({
@@ -39,23 +41,30 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
     });
   }, []);
 
-  // Typewriter efekti için ayrı useEffect
+  // Üst animasyonlar bitsin, alt yazı görünsün; sonra harf harf yaz
   useEffect(() => {
-    const targetText = 'www.burakcankorpinar.dev';
-    
+    const startTimer = setTimeout(() => {
+      setTypewriterStarted(true);
+    }, 2600);
+
+    return () => clearTimeout(startTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!typewriterStarted || typewriterCompleted) return;
+
     if (currentIndex < targetText.length) {
       const timer = setTimeout(() => {
         setDisplayText(targetText.substring(0, currentIndex + 1));
-        setCurrentIndex(prev => prev + 1);
-      }, 55);
+        setCurrentIndex((prev) => prev + 1);
+      }, 100);
       return () => clearTimeout(timer);
-    } else if (currentIndex === targetText.length && !typewriterCompleted) {
-      // Typewriter tamamlandı
-      setTypewriterCompleted(true);
     }
-  }, [currentIndex, typewriterCompleted]);
 
-  // Typewriter bitince kısa bekle, çıkış animasyonuyla ana sayfaya geç
+    setTypewriterCompleted(true);
+  }, [currentIndex, typewriterStarted, typewriterCompleted, targetText.length]);
+
+  // Yazı tamamlanınca kısaca tut, sonra ana sayfaya geç (siyah boşluk yok)
   useEffect(() => {
     if (!typewriterCompleted) return;
 
@@ -64,8 +73,8 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       setIsLoading(false);
       completeTimer = setTimeout(() => {
         onLoadingComplete?.();
-      }, 450);
-    }, 600);
+      }, 500);
+    }, 1800);
 
     return () => {
       clearTimeout(timer);
@@ -79,7 +88,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       scale: 1.05,
       filter: "blur(8px)",
       transition: {
-        duration: 0.45,
+        duration: 0.5,
         ease: "easeInOut",
         when: "beforeChildren",
         staggerChildren: 0.05
