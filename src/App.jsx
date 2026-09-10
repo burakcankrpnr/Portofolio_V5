@@ -9,6 +9,7 @@ import Portofolio from "./Pages/Portofolio";
 import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
+import NotFound from "./Pages/NotFound";
 
 const SITE_ORIGIN = "https://burakcankorpinar.dev";
 
@@ -169,6 +170,7 @@ function App() {
         <Route path="/portfolio" element={<LandingPage />} />
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/project/:id" element={<ProjectPageLayout />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
