@@ -47,7 +47,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       const timer = setTimeout(() => {
         setDisplayText(targetText.substring(0, currentIndex + 1));
         setCurrentIndex(prev => prev + 1);
-      }, 100);
+      }, 55);
       return () => clearTimeout(timer);
     } else if (currentIndex === targetText.length && !typewriterCompleted) {
       // Typewriter tamamlandı
@@ -55,31 +55,34 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
     }
   }, [currentIndex, typewriterCompleted]);
 
-  // TypewriterEffect tamamlandıktan sonra sayfa açılsın
+  // Typewriter bitince kısa bekle, çıkış animasyonuyla ana sayfaya geç
   useEffect(() => {
-    if (typewriterCompleted) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-        setTimeout(() => {
-          onLoadingComplete?.();
-        }, 1000);
-      }, 3000); // TypewriterEffect tamamlandıktan sonra 3 saniye bekle
-      
-      return () => clearTimeout(timer);
-    }
-  }, [typewriterCompleted, onLoadingComplete]);
+    if (!typewriterCompleted) return;
 
+    let completeTimer;
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      completeTimer = setTimeout(() => {
+        onLoadingComplete?.();
+      }, 450);
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(completeTimer);
+    };
+  }, [typewriterCompleted, onLoadingComplete]);
 
   const containerVariants = {
     exit: {
       opacity: 0,
-      scale: 1.1,
-      filter: "blur(10px)",
+      scale: 1.05,
+      filter: "blur(8px)",
       transition: {
-        duration: 0.8,
+        duration: 0.45,
         ease: "easeInOut",
         when: "beforeChildren",
-        staggerChildren: 0.1
+        staggerChildren: 0.05
       }
     }
   };
@@ -99,7 +102,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 bg-[#030014]"
+          className="fixed inset-0 z-[100] bg-[#030014]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit="exit"

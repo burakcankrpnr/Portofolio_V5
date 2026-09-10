@@ -148,16 +148,6 @@ const myWebsites = [
       "Influencer Marketing Mobile App - Base of Influencer platformunun mobil uygulaması olarak geliştirildi. Kampanya yönetimi, influencer bağlantıları ve içerik takibi için optimize edilmiş mobil deneyim sunar. Cross-platform uyumluluk ile iOS ve Android cihazlarda sorunsuz çalışır. Push notification, gerçek zamanlı bildirimler ve offline çalışma özellikleri ile kullanıcı deneyimi geliştirildi.",
     Link: "https://app.baseofinfluencer.com/",
   },
-  {
-    id: 6,
-    Title: "Home London Breeze",
-    Img: "./hml.png",
-    Company: "Creamake E-Ticaret Ajansı",
-    CompanyLink: COMPANY_LINKS.creamake,
-    Description:
-      "Shopify E-Commerce Platform - Lüks moda ve yaşam tarzı ürünleri sunan Shopify tabanlı e-ticaret platformu geliştirildi. Dinamik ürün kategorileri, filtreleme ve arama işlevselliği ile özel Shopify Liquid teması oluşturuldu. Sorunsuz alışveriş deneyimleri için duyarlı ve mobil uyumlu UI tasarlandı. Shopify admin paneli aracılığıyla içerik ve ürün yönetimi verimli bir şekilde gerçekleştirildi.",
-    Link: "https://homelondonbreeze.com/",
-  },
 ];
 
 // Teknik Yeterlilikler
