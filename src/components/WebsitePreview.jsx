@@ -9,6 +9,12 @@ const previewFileFromUrl = (url) => {
   }
 };
 
+/** Canlı full-page yakalama (hover scroll için uzun görsel) */
+const liveCaptureSources = (url) => [
+  `https://image.thum.io/get/fullpage/width/1440/noanimate/wait/3/${url}`,
+  `https://mini.s-shot.ru/1440x9000/JPEG/1440/Z80/?${url}`,
+];
+
 const WebsitePreview = ({ url, title }) => {
   const frameRef = useRef(null);
   const imageRef = useRef(null);
@@ -18,6 +24,9 @@ const WebsitePreview = ({ url, title }) => {
   const [offset, setOffset] = useState(0);
   const [src, setSrc] = useState(null);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const sourceIndexRef = useRef(0);
+  const sourcesRef = useRef([]);
 
   const previewPath = previewFileFromUrl(url);
 
@@ -39,45 +48,45 @@ const WebsitePreview = ({ url, title }) => {
   }, []);
 
   useEffect(() => {
-    if (!previewPath) {
-      setReady(false);
-      setSrc(null);
-      return undefined;
-    }
-
     let cancelled = false;
-    let found = false;
+    sourceIndexRef.current = 0;
+    setReady(false);
+    setFailed(false);
+    setIsActive(false);
+    setSrc(null);
 
-    const check = async () => {
-      if (cancelled || found) return;
+    const buildSources = async () => {
+      const live = liveCaptureSources(url);
+      const list = [];
 
-      try {
-        const stamp = Date.now();
-        const response = await fetch(`${previewPath}?t=${stamp}`, {
-          method: "HEAD",
-          cache: "no-store",
-        });
-
-        if (!response.ok || cancelled) return;
-
-        found = true;
-        setSrc(`${previewPath}?t=${stamp}`);
-        setReady(true);
-      } catch {
-        // keep empty until file appears
+      // Yerel dosya varsa önce onu dene (hızlı), yoksa canlı yakalama
+      if (previewPath) {
+        try {
+          const response = await fetch(previewPath, {
+            method: "HEAD",
+            cache: "no-store",
+          });
+          if (response.ok) {
+            list.push(previewPath);
+          }
+        } catch {
+          // canlıya düş
+        }
       }
+
+      list.push(...live);
+      if (cancelled) return;
+
+      sourcesRef.current = list;
+      setSrc(list[0]);
     };
 
-    setReady(false);
-    setSrc(null);
-    check();
-    const timer = setInterval(check, 4000);
+    buildSources();
 
     return () => {
       cancelled = true;
-      clearInterval(timer);
     };
-  }, [previewPath]);
+  }, [url, previewPath]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -95,6 +104,29 @@ const WebsitePreview = ({ url, title }) => {
     const extra = Math.max(0, image.scrollHeight - frame.clientHeight);
     setOffset(extra);
     setDuration(extra <= 0 ? 6 : Math.min(28, Math.max(8, extra / 90)));
+  };
+
+  const handleImageLoad = () => {
+    setReady(true);
+    setFailed(false);
+    // layout otursun diye bir frame sonra ölç
+    requestAnimationFrame(() => measureScroll());
+  };
+
+  const handleImageError = () => {
+    const next = sourceIndexRef.current + 1;
+    const sources = sourcesRef.current;
+
+    if (next < sources.length) {
+      sourceIndexRef.current = next;
+      setReady(false);
+      setSrc(sources[next]);
+      return;
+    }
+
+    setReady(false);
+    setFailed(true);
+    setSrc(null);
   };
 
   const displayUrl = (() => {
@@ -128,31 +160,34 @@ const WebsitePreview = ({ url, title }) => {
         aria-label={
           ready
             ? `${title} canlı önizleme`
-            : `${title} önizlemesi hazırlanıyor`
+            : failed
+              ? `${title} önizlemesi alınamadı`
+              : `${title} önizlemesi hazırlanıyor`
         }
       >
-        {ready && src ? (
-          <>
-            <img
-              ref={imageRef}
-              src={src}
-              alt={`${title} sitesinin canlı görünümü`}
-              onLoad={measureScroll}
-              onError={() => {
-                setReady(false);
-                setSrc(null);
-              }}
-              className="absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform"
-              style={{
-                transform: isActive
-                  ? `translateY(-${offset}px)`
-                  : "translateY(0)",
-                transition: isActive
-                  ? `transform ${duration}s linear`
-                  : "transform 0.8s ease-out",
-              }}
-            />
+        {src && (
+          <img
+            ref={imageRef}
+            src={src}
+            alt={`${title} sitesinin canlı görünümü`}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform ${
+              ready ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              transform: isActive
+                ? `translateY(-${offset}px)`
+                : "translateY(0)",
+              transition: isActive
+                ? `transform ${duration}s linear`
+                : "transform 0.8s ease-out",
+            }}
+          />
+        )}
 
+        {ready && (
+          <>
             <div
               className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 transition-opacity duration-300 ${
                 isActive ? "opacity-0" : "opacity-100"
@@ -176,10 +211,16 @@ const WebsitePreview = ({ url, title }) => {
               </div>
             </div>
           </>
-        ) : (
+        )}
+
+        {!ready && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950 px-4 text-center">
             <div className="h-8 w-8 animate-pulse rounded-full border border-white/10 bg-white/5" />
-            <p className="text-[11px] text-white/40">Önizleme hazırlanıyor…</p>
+            <p className="text-[11px] text-white/40">
+              {failed
+                ? "Önizleme alınamadı"
+                : "Canlı önizleme hazırlanıyor…"}
+            </p>
           </div>
         )}
       </div>
