@@ -9,39 +9,9 @@ const previewFileFromUrl = (url) => {
   }
 };
 
-const liveSources = (url) => [
-  `https://image.thum.io/get/fullpage/width/1440/noanimate/wait/2/${url}`,
-  `https://mini.s-shot.ru/1440x9000/JPEG/1440/Z80/?${url}`,
-];
-
-/** Aynı anda tek canlı yakalama — hepsi birden yüklenince patlamasın */
-const liveQueue = [];
-let liveBusy = false;
-
-const enqueueLive = (task) =>
-  new Promise((resolve, reject) => {
-    liveQueue.push({ task, resolve, reject });
-    pumpLiveQueue();
-  });
-
-const pumpLiveQueue = () => {
-  if (liveBusy || liveQueue.length === 0) return;
-  liveBusy = true;
-  const { task, resolve, reject } = liveQueue.shift();
-  Promise.resolve()
-    .then(task)
-    .then(resolve, reject)
-    .finally(() => {
-      liveBusy = false;
-      // Siteler arası kısa nefes
-      setTimeout(pumpLiveQueue, 600);
-    });
-};
-
-const isImageResponse = (response) => {
+const isRealImage = (response) => {
   if (!response?.ok) return false;
   const type = (response.headers.get("content-type") || "").toLowerCase();
-  // SPA fallback HTML'i image sanmayalım
   if (type.includes("text/html")) return false;
   if (type && !type.startsWith("image/") && !type.includes("octet-stream")) {
     return false;
@@ -49,21 +19,10 @@ const isImageResponse = (response) => {
   return true;
 };
 
-const preload = (href) =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      // Challenge / boş beyaz ekran gibi aşırı küçük görselleri ele
-      if (img.naturalWidth < 200 || img.naturalHeight < 200) {
-        reject(new Error("preview too small"));
-        return;
-      }
-      resolve(href);
-    };
-    img.onerror = reject;
-    img.src = href;
-  });
-
+/**
+ * Sadece proje içi /previews/*.jpg kullanır.
+ * Canlı screenshot servisi yok → Cloudflare challenge / beyaz ekran yok.
+ */
 const WebsitePreview = ({ url, title, fallbackImg }) => {
   const rootRef = useRef(null);
   const frameRef = useRef(null);
@@ -83,7 +42,6 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     const image = imageRef.current;
     if (!frame || !image || !image.naturalWidth) return;
 
-    // absolute img'de scrollHeight güvenilir değil → natural ölçü kullan
     const displayedHeight =
       (image.naturalHeight / image.naturalWidth) * frame.clientWidth;
     const extra = Math.max(0, displayedHeight - frame.clientHeight);
@@ -104,7 +62,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
           observer.disconnect();
         }
       },
-      { rootMargin: "180px 0px", threshold: 0.01 }
+      { rootMargin: "160px 0px", threshold: 0.01 }
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -114,65 +72,28 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     if (!inView) return undefined;
     let cancelled = false;
 
-    const apply = (href) => {
-      if (cancelled) return;
-      setSrc(href);
-      setReady(true);
-    };
-
     const resolve = async () => {
       setReady(false);
       setSrc(null);
       setIsActive(false);
 
-      // 1) Yerel full-page preview
       if (previewPath) {
         try {
           const response = await fetch(previewPath, {
             method: "HEAD",
             cache: "no-store",
           });
-          if (!cancelled && isImageResponse(response)) {
-            const href = `${previewPath}?v=1`;
-            await preload(href);
-            if (!cancelled) {
-              apply(href);
-              return;
-            }
+          if (!cancelled && isRealImage(response)) {
+            setSrc(previewPath);
+            return;
           }
         } catch {
-          // devam
+          // fallback
         }
-      }
-
-      // 2) Canlı yakalama (kuyrukta, tek tek)
-      try {
-        const href = await enqueueLive(async () => {
-          for (const candidate of liveSources(url)) {
-            try {
-              await preload(candidate);
-              return candidate;
-            } catch {
-              // sonraki
-            }
-          }
-          throw new Error("live preview failed");
-        });
-        if (!cancelled) {
-          apply(href);
-          return;
-        }
-      } catch {
-        // 3) Kart görseli
       }
 
       if (!cancelled && fallbackImg) {
-        try {
-          await preload(fallbackImg);
-          if (!cancelled) apply(fallbackImg);
-        } catch {
-          if (!cancelled) setReady(false);
-        }
+        setSrc(fallbackImg);
       }
     };
 
@@ -180,7 +101,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     return () => {
       cancelled = true;
     };
-  }, [inView, previewPath, url, fallbackImg]);
+  }, [inView, previewPath, fallbackImg]);
 
   useEffect(() => {
     const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -253,6 +174,14 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
             onLoad={() => {
               setReady(true);
               requestAnimationFrame(() => measureScroll());
+            }}
+            onError={() => {
+              if (fallbackImg && src !== fallbackImg) {
+                setSrc(fallbackImg);
+                return;
+              }
+              setReady(false);
+              setSrc(null);
             }}
             className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform select-none ${
               ready ? "opacity-100" : "opacity-0"
