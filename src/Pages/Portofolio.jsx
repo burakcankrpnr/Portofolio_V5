@@ -61,7 +61,7 @@ const myWebsites = [
   {
     id: 10,
     Title: "StylingPark",
-    Img: "/previews/stylingpark.com.jpg",
+    Img: "/stylingpark.png",
     Company: "StylingPark",
     CompanyLink: COMPANY_LINKS.stylingPark,
     Description:
@@ -71,7 +71,7 @@ const myWebsites = [
   {
     id: 11,
     Title: "Mavelone",
-    Img: "/previews/mavelone.com.jpg",
+    Img: "/stylingpark.png",
     Company: "StylingPark",
     CompanyLink: COMPANY_LINKS.stylingPark,
     Description:
@@ -81,7 +81,7 @@ const myWebsites = [
   {
     id: 12,
     Title: "HabboPÖH",
-    Img: "/previews/habbopoh.com.jpg",
+    Img: "/accstudio.co.png",
     Company: "Acc Studio",
     CompanyLink: COMPANY_LINKS.accStudio,
     Description:
@@ -91,7 +91,7 @@ const myWebsites = [
   {
     id: 5,
     Title: "Acc Studio",
-    Img: "/previews/accstudio.co.jpg",
+    Img: "/accstudio.co.png",
     Company: "Acc Studio",
     CompanyLink: COMPANY_LINKS.accStudio,
     Description:
@@ -101,7 +101,7 @@ const myWebsites = [
   {
     id: 7,
     Title: "Psikolog Emine Yıldırım",
-    Img: "/previews/psikologemineyildirim.com.jpg",
+    Img: "/emineyildirim.png",
     Company: "Acc Studio",
     CompanyLink: COMPANY_LINKS.accStudio,
     Description:
@@ -111,7 +111,7 @@ const myWebsites = [
   {
     id: 8,
     Title: "Akdeniz Konsept",
-    Img: "/previews/akdenizkonsept.com.jpg",
+    Img: "/akdeniz-konsept.png",
     Company: "Acc Studio",
     CompanyLink: COMPANY_LINKS.accStudio,
     Description:
@@ -121,7 +121,7 @@ const myWebsites = [
   {
     id: 9,
     Title: "Mercado Plastik",
-    Img: "/previews/mercadoplastik.com.jpg",
+    Img: "/mercadologo-01.png",
     Company: "Acc Studio",
     CompanyLink: COMPANY_LINKS.accStudio,
     Description:
@@ -131,7 +131,7 @@ const myWebsites = [
   {
     id: 3,
     Title: "Base of Influencer",
-    Img: "/previews/baseofinfluencer.com.jpg",
+    Img: "/boi.png",
     Company: "Creamake E-Ticaret Ajansı",
     CompanyLink: COMPANY_LINKS.creamake,
     Description:
@@ -141,7 +141,7 @@ const myWebsites = [
   {
     id: 4,
     Title: "Base of Influencer App",
-    Img: "/previews/app.baseofinfluencer.com.jpg",
+    Img: "/boiapp.png",
     Company: "Creamake E-Ticaret Ajansı",
     CompanyLink: COMPANY_LINKS.creamake,
     Description:

@@ -10,25 +10,25 @@ const previewFileFromUrl = (url) => {
 };
 
 /**
- * Sadece proje içi /previews/*.jpg — HEAD yok (takılma olmasın).
+ * Yerel /previews/*.jpg gösterir.
+ * Cache'den gelen görsellerde onLoad kaçmasın diye complete kontrolü var.
  */
 const WebsitePreview = ({ url, title, fallbackImg }) => {
-  const rootRef = useRef(null);
   const frameRef = useRef(null);
   const imageRef = useRef(null);
-  const [inView, setInView] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [canHover, setCanHover] = useState(true);
   const [duration, setDuration] = useState(12);
   const [offset, setOffset] = useState(0);
-  const [src, setSrc] = useState(null);
+  const [src, setSrc] = useState(() => previewFileFromUrl(url) || fallbackImg || null);
   const [ready, setReady] = useState(false);
 
   const previewPath = previewFileFromUrl(url);
-  const fallbackPath =
-    fallbackImg?.startsWith("./")
+  const fallbackPath = fallbackImg
+    ? fallbackImg.startsWith("./")
       ? fallbackImg.replace(/^\.\//, "/")
-      : fallbackImg;
+      : fallbackImg
+    : null;
 
   const measureScroll = useCallback(() => {
     const frame = frameRef.current;
@@ -42,32 +42,25 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     setDuration(extra <= 0 ? 6 : Math.min(28, Math.max(8, extra / 90)));
   }, []);
 
-  useEffect(() => {
-    const node = rootRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") {
-      setInView(true);
-      return undefined;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "160px 0px", threshold: 0.01 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+  const markReady = useCallback(() => {
+    setReady(true);
+    requestAnimationFrame(() => measureScroll());
+  }, [measureScroll]);
 
   useEffect(() => {
-    if (!inView) return;
     setReady(false);
     setIsActive(false);
-    // Önce yerel preview; yoksa/bozulursa onError fallback
     setSrc(previewPath || fallbackPath || null);
-  }, [inView, previewPath, fallbackPath]);
+  }, [url, previewPath, fallbackPath]);
+
+  // Cache'lenmiş görsellerde onLoad kaçabiliyor
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image || !src) return;
+    if (image.complete && image.naturalWidth > 0) {
+      markReady();
+    }
+  }, [src, markReady]);
 
   useEffect(() => {
     const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -101,7 +94,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   })();
 
   return (
-    <div ref={rootRef} className="flex h-full flex-col overflow-hidden bg-slate-950">
+    <div className="flex h-full flex-col overflow-hidden bg-slate-950">
       <div className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
         <span className="h-2 w-2 rounded-full bg-red-400/80" />
         <span className="h-2 w-2 rounded-full bg-amber-400/80" />
@@ -137,17 +130,15 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
             src={src}
             alt={`${title} sitesinin görünümü`}
             draggable={false}
-            onLoad={() => {
-              setReady(true);
-              requestAnimationFrame(() => measureScroll());
-            }}
+            onLoad={markReady}
             onError={() => {
               if (fallbackPath && src !== fallbackPath) {
+                setReady(false);
                 setSrc(fallbackPath);
                 return;
               }
-              setReady(false);
-              setSrc(null);
+              // Son çare: kırık görselde spinner yerine boş bırakma
+              setReady(true);
             }}
             className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform select-none ${
               ready ? "opacity-100" : "opacity-0"
