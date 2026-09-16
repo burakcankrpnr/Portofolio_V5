@@ -9,12 +9,63 @@ const previewFileFromUrl = (url) => {
   }
 };
 
-/**
- * Ziyaretçi tarafında sadece yerel önizleme.
- * Canlı thum.io vb. Cloudflare challenge / beyaz ekran üretir ve hepsi birden yüklenince patlar.
- * Güncel görseller saatlik capture daemon ile /previews altına yazılır.
- */
+const liveSources = (url) => [
+  `https://image.thum.io/get/fullpage/width/1440/noanimate/wait/2/${url}`,
+  `https://mini.s-shot.ru/1440x9000/JPEG/1440/Z80/?${url}`,
+];
+
+/** Aynı anda tek canlı yakalama — hepsi birden yüklenince patlamasın */
+const liveQueue = [];
+let liveBusy = false;
+
+const enqueueLive = (task) =>
+  new Promise((resolve, reject) => {
+    liveQueue.push({ task, resolve, reject });
+    pumpLiveQueue();
+  });
+
+const pumpLiveQueue = () => {
+  if (liveBusy || liveQueue.length === 0) return;
+  liveBusy = true;
+  const { task, resolve, reject } = liveQueue.shift();
+  Promise.resolve()
+    .then(task)
+    .then(resolve, reject)
+    .finally(() => {
+      liveBusy = false;
+      // Siteler arası kısa nefes
+      setTimeout(pumpLiveQueue, 600);
+    });
+};
+
+const isImageResponse = (response) => {
+  if (!response?.ok) return false;
+  const type = (response.headers.get("content-type") || "").toLowerCase();
+  // SPA fallback HTML'i image sanmayalım
+  if (type.includes("text/html")) return false;
+  if (type && !type.startsWith("image/") && !type.includes("octet-stream")) {
+    return false;
+  }
+  return true;
+};
+
+const preload = (href) =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // Challenge / boş beyaz ekran gibi aşırı küçük görselleri ele
+      if (img.naturalWidth < 200 || img.naturalHeight < 200) {
+        reject(new Error("preview too small"));
+        return;
+      }
+      resolve(href);
+    };
+    img.onerror = reject;
+    img.src = href;
+  });
+
 const WebsitePreview = ({ url, title, fallbackImg }) => {
+  const rootRef = useRef(null);
   const frameRef = useRef(null);
   const imageRef = useRef(null);
   const [inView, setInView] = useState(false);
@@ -30,21 +81,22 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   const measureScroll = useCallback(() => {
     const frame = frameRef.current;
     const image = imageRef.current;
-    if (!frame || !image) return;
+    if (!frame || !image || !image.naturalWidth) return;
 
-    const extra = Math.max(0, image.scrollHeight - frame.clientHeight);
+    // absolute img'de scrollHeight güvenilir değil → natural ölçü kullan
+    const displayedHeight =
+      (image.naturalHeight / image.naturalWidth) * frame.clientWidth;
+    const extra = Math.max(0, displayedHeight - frame.clientHeight);
     setOffset(extra);
     setDuration(extra <= 0 ? 6 : Math.min(28, Math.max(8, extra / 90)));
   }, []);
 
-  // Kart görünür olunca yükle (hepsini birden değil)
   useEffect(() => {
-    const node = frameRef.current;
+    const node = rootRef.current;
     if (!node || typeof IntersectionObserver === "undefined") {
       setInView(true);
       return undefined;
     }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -52,39 +104,75 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
           observer.disconnect();
         }
       },
-      { rootMargin: "120px 0px", threshold: 0.05 }
+      { rootMargin: "180px 0px", threshold: 0.01 }
     );
-
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
     if (!inView) return undefined;
-
     let cancelled = false;
+
+    const apply = (href) => {
+      if (cancelled) return;
+      setSrc(href);
+      setReady(true);
+    };
 
     const resolve = async () => {
       setReady(false);
       setSrc(null);
+      setIsActive(false);
 
+      // 1) Yerel full-page preview
       if (previewPath) {
         try {
           const response = await fetch(previewPath, {
             method: "HEAD",
             cache: "no-store",
           });
-          if (!cancelled && response.ok) {
-            setSrc(`${previewPath}?t=${Date.now()}`);
-            return;
+          if (!cancelled && isImageResponse(response)) {
+            const href = `${previewPath}?v=1`;
+            await preload(href);
+            if (!cancelled) {
+              apply(href);
+              return;
+            }
           }
         } catch {
-          // fallback
+          // devam
         }
       }
 
+      // 2) Canlı yakalama (kuyrukta, tek tek)
+      try {
+        const href = await enqueueLive(async () => {
+          for (const candidate of liveSources(url)) {
+            try {
+              await preload(candidate);
+              return candidate;
+            } catch {
+              // sonraki
+            }
+          }
+          throw new Error("live preview failed");
+        });
+        if (!cancelled) {
+          apply(href);
+          return;
+        }
+      } catch {
+        // 3) Kart görseli
+      }
+
       if (!cancelled && fallbackImg) {
-        setSrc(fallbackImg);
+        try {
+          await preload(fallbackImg);
+          if (!cancelled) apply(fallbackImg);
+        } catch {
+          if (!cancelled) setReady(false);
+        }
       }
     };
 
@@ -92,7 +180,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     return () => {
       cancelled = true;
     };
-  }, [inView, previewPath, fallbackImg]);
+  }, [inView, previewPath, url, fallbackImg]);
 
   useEffect(() => {
     const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -115,7 +203,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
     const observer = new ResizeObserver(() => measureScroll());
     observer.observe(frame);
     return () => observer.disconnect();
-  }, [ready, measureScroll]);
+  }, [ready, src, measureScroll]);
 
   const displayUrl = (() => {
     try {
@@ -126,7 +214,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   })();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-slate-950">
+    <div ref={rootRef} className="flex h-full flex-col overflow-hidden bg-slate-950">
       <div className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
         <span className="h-2 w-2 rounded-full bg-red-400/80" />
         <span className="h-2 w-2 rounded-full bg-amber-400/80" />
@@ -139,10 +227,16 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
       <div
         ref={frameRef}
         className="relative min-h-0 flex-1 overflow-hidden"
-        onMouseEnter={() => ready && canHover && setIsActive(true)}
-        onMouseLeave={() => ready && canHover && setIsActive(false)}
+        onMouseEnter={() => {
+          if (!ready) return;
+          measureScroll();
+          if (canHover) setIsActive(true);
+        }}
+        onMouseLeave={() => canHover && setIsActive(false)}
         onClick={() => {
-          if (ready && !canHover) setIsActive((current) => !current);
+          if (!ready || canHover) return;
+          measureScroll();
+          setIsActive((current) => !current);
         }}
         role="img"
         aria-label={
@@ -151,28 +245,23 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
       >
         {src && (
           <img
+            key={`${url}-${src}`}
             ref={imageRef}
             src={src}
             alt={`${title} sitesinin görünümü`}
+            draggable={false}
             onLoad={() => {
               setReady(true);
               requestAnimationFrame(() => measureScroll());
             }}
-            onError={() => {
-              if (fallbackImg && src !== fallbackImg) {
-                setSrc(fallbackImg);
-                return;
-              }
-              setReady(false);
-              setSrc(null);
-            }}
-            className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform ${
+            className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform select-none ${
               ready ? "opacity-100" : "opacity-0"
             }`}
             style={{
+              height: "auto",
               transform: isActive
-                ? `translateY(-${offset}px)`
-                : "translateY(0)",
+                ? `translate3d(0, -${offset}px, 0)`
+                : "translate3d(0, 0, 0)",
               transition: isActive
                 ? `transform ${duration}s linear`
                 : "transform 0.8s ease-out",
