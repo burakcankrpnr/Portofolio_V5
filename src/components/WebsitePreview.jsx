@@ -9,19 +9,8 @@ const previewFileFromUrl = (url) => {
   }
 };
 
-const isRealImage = (response) => {
-  if (!response?.ok) return false;
-  const type = (response.headers.get("content-type") || "").toLowerCase();
-  if (type.includes("text/html")) return false;
-  if (type && !type.startsWith("image/") && !type.includes("octet-stream")) {
-    return false;
-  }
-  return true;
-};
-
 /**
- * Sadece proje içi /previews/*.jpg kullanır.
- * Canlı screenshot servisi yok → Cloudflare challenge / beyaz ekran yok.
+ * Sadece proje içi /previews/*.jpg — HEAD yok (takılma olmasın).
  */
 const WebsitePreview = ({ url, title, fallbackImg }) => {
   const rootRef = useRef(null);
@@ -36,6 +25,10 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   const [ready, setReady] = useState(false);
 
   const previewPath = previewFileFromUrl(url);
+  const fallbackPath =
+    fallbackImg?.startsWith("./")
+      ? fallbackImg.replace(/^\.\//, "/")
+      : fallbackImg;
 
   const measureScroll = useCallback(() => {
     const frame = frameRef.current;
@@ -69,39 +62,12 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   }, []);
 
   useEffect(() => {
-    if (!inView) return undefined;
-    let cancelled = false;
-
-    const resolve = async () => {
-      setReady(false);
-      setSrc(null);
-      setIsActive(false);
-
-      if (previewPath) {
-        try {
-          const response = await fetch(previewPath, {
-            method: "HEAD",
-            cache: "no-store",
-          });
-          if (!cancelled && isRealImage(response)) {
-            setSrc(previewPath);
-            return;
-          }
-        } catch {
-          // fallback
-        }
-      }
-
-      if (!cancelled && fallbackImg) {
-        setSrc(fallbackImg);
-      }
-    };
-
-    resolve();
-    return () => {
-      cancelled = true;
-    };
-  }, [inView, previewPath, fallbackImg]);
+    if (!inView) return;
+    setReady(false);
+    setIsActive(false);
+    // Önce yerel preview; yoksa/bozulursa onError fallback
+    setSrc(previewPath || fallbackPath || null);
+  }, [inView, previewPath, fallbackPath]);
 
   useEffect(() => {
     const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -176,8 +142,8 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
               requestAnimationFrame(() => measureScroll());
             }}
             onError={() => {
-              if (fallbackImg && src !== fallbackImg) {
-                setSrc(fallbackImg);
+              if (fallbackPath && src !== fallbackPath) {
+                setSrc(fallbackPath);
                 return;
               }
               setReady(false);

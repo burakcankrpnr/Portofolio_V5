@@ -8,6 +8,15 @@ const rootDir = join(__dirname, "..");
 const outDir = join(rootDir, "public", "previews");
 const portfolioPath = join(rootDir, "src", "Pages", "Portofolio.jsx");
 
+const forceAll = process.argv.includes("--all");
+const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));
+const onlyHosts = onlyArg
+  ? onlyArg
+      .slice("--only=".length)
+      .split(",")
+      .map((h) => h.trim().toLowerCase())
+      .filter(Boolean)
+  : [];
 const delayMs = Number(process.env.PREVIEW_DELAY_MS || 2500);
 
 const chromeCandidates = [
@@ -192,6 +201,11 @@ const isChallengePage = async (page) => {
 const preparePage = async (page) => {
   await page.addStyleTag({
     content: `
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
       [data-aos],
       [data-aos].aos-init,
       [data-aos].aos-animate,
@@ -268,8 +282,25 @@ const preparePage = async (page) => {
       await document.fonts.ready;
     }
 
+    // Full-page screenshot'ta sticky/fixed header kaymasını engelle
     window.scrollTo(0, 0);
-    await pause(1000);
+    await pause(600);
+
+    document.querySelectorAll("body *").forEach((el) => {
+      const style = window.getComputedStyle(el);
+      if (style.position !== "fixed" && style.position !== "sticky") return;
+      const rect = el.getBoundingClientRect();
+      if (rect.height <= 0 || rect.width <= 0) return;
+      if (rect.top > 140) return;
+      if (rect.height > window.innerHeight * 0.45) return;
+      el.style.setProperty("position", "relative", "important");
+      el.style.setProperty("top", "0", "important");
+      el.style.setProperty("bottom", "auto", "important");
+      el.style.setProperty("transform", "none", "important");
+      el.style.setProperty("inset", "auto", "important");
+    });
+
+    await pause(900);
   });
 };
 
@@ -329,7 +360,9 @@ const capture = async (browser, url) => {
 
 export const capturePortfolioPreviews = async (options = {}) => {
   const forceAll =
-    options.all === true || process.argv.includes("--all");
+    options.all === true ||
+    process.argv.includes("--all") ||
+    onlyHosts.length > 0;
   const missingOnly = !forceAll;
 
   await mkdir(outDir, { recursive: true });
@@ -338,9 +371,13 @@ export const capturePortfolioPreviews = async (options = {}) => {
   const queue = [];
 
   for (const url of sites) {
-    const file = join(outDir, `${hostnameFrom(url)}.jpg`);
+    const host = hostnameFrom(url).toLowerCase();
+    if (onlyHosts.length > 0 && !onlyHosts.includes(host)) {
+      continue;
+    }
+    const file = join(outDir, `${host}.jpg`);
     if (missingOnly && (await fileExists(file))) {
-      console.log(`skip ${hostnameFrom(url)}.jpg (exists)`);
+      console.log(`skip ${host}.jpg (exists)`);
       continue;
     }
     queue.push(url);
