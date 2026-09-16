@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
-/** 6 saatte bir cache kır — siteler değişince yeni yakalama gelsin */
-const REFRESH_BUCKET_MS = 6 * 60 * 60 * 1000;
-/** Sayfa açıkken arka plan kontrol aralığı */
-const BACKGROUND_CHECK_MS = 15 * 60 * 1000;
-/** Hata sonrası yeniden deneme */
-const RETRY_MS = 45 * 1000;
-
 const previewFileFromUrl = (url) => {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
@@ -16,52 +9,21 @@ const previewFileFromUrl = (url) => {
   }
 };
 
-const cacheBucket = (now = Date.now()) => Math.floor(now / REFRESH_BUCKET_MS);
-
-const liveCaptureSources = (url, bucket) => {
-  const stamp = `v=${bucket}`;
-  return [
-    `https://image.thum.io/get/fullpage/width/1440/noanimate/wait/3/${url}?${stamp}`,
-    `https://mini.s-shot.ru/1440x9000/JPEG/1440/Z80/?${url}&${stamp}`,
-  ];
-};
-
-const preloadImage = (href) =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(href);
-    img.onerror = reject;
-    img.src = href;
-  });
-
-const loadFirstAvailable = async (sources, signal) => {
-  for (const href of sources) {
-    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    try {
-      await preloadImage(href);
-      return href;
-    } catch {
-      // sonraki kaynağı dene
-    }
-  }
-  throw new Error("All preview sources failed");
-};
-
-const WebsitePreview = ({ url, title }) => {
+/**
+ * Ziyaretçi tarafında sadece yerel önizleme.
+ * Canlı thum.io vb. Cloudflare challenge / beyaz ekran üretir ve hepsi birden yüklenince patlar.
+ * Güncel görseller saatlik capture daemon ile /previews altına yazılır.
+ */
+const WebsitePreview = ({ url, title, fallbackImg }) => {
   const frameRef = useRef(null);
   const imageRef = useRef(null);
-  const bucketRef = useRef(null);
-  const abortRef = useRef(null);
-  const readyRef = useRef(false);
-
+  const [inView, setInView] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [canHover, setCanHover] = useState(true);
   const [duration, setDuration] = useState(12);
   const [offset, setOffset] = useState(0);
   const [src, setSrc] = useState(null);
   const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [checking, setChecking] = useState(false);
 
   const previewPath = previewFileFromUrl(url);
 
@@ -75,62 +37,37 @@ const WebsitePreview = ({ url, title }) => {
     setDuration(extra <= 0 ? 6 : Math.min(28, Math.max(8, extra / 90)));
   }, []);
 
-  const applySrc = useCallback(
-    (href) => {
-      setSrc(href);
-      setReady(true);
-      readyRef.current = true;
-      setFailed(false);
-      setChecking(false);
-      requestAnimationFrame(() => measureScroll());
-    },
-    [measureScroll]
-  );
-
-  const refreshLive = useCallback(
-    async ({ force = false } = {}) => {
-      const bucket = cacheBucket();
-      if (!force && bucketRef.current === bucket && readyRef.current) return;
-
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      bucketRef.current = bucket;
-      setChecking(true);
-
-      try {
-        const href = await loadFirstAvailable(
-          liveCaptureSources(url, bucket),
-          controller.signal
-        );
-        if (controller.signal.aborted) return;
-        applySrc(href);
-      } catch (error) {
-        if (error?.name === "AbortError") return;
-        setChecking(false);
-        if (!readyRef.current) {
-          setFailed(true);
-          setSrc(null);
-          setReady(false);
-        }
-      }
-    },
-    [url, applySrc]
-  );
-
-  // İlk açılış: yerel placeholder → canlı güncelleme
+  // Kart görünür olunca yükle (hepsini birden değil)
   useEffect(() => {
-    let cancelled = false;
-    bucketRef.current = null;
-    readyRef.current = false;
-    setReady(false);
-    setFailed(false);
-    setIsActive(false);
-    setSrc(null);
-    setChecking(true);
+    const node = frameRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return undefined;
+    }
 
-    const boot = async () => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "120px 0px", threshold: 0.05 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) return undefined;
+
+    let cancelled = false;
+
+    const resolve = async () => {
+      setReady(false);
+      setSrc(null);
+
       if (previewPath) {
         try {
           const response = await fetch(previewPath, {
@@ -138,52 +75,24 @@ const WebsitePreview = ({ url, title }) => {
             cache: "no-store",
           });
           if (!cancelled && response.ok) {
-            await preloadImage(previewPath);
-            if (!cancelled) applySrc(previewPath);
+            setSrc(`${previewPath}?t=${Date.now()}`);
+            return;
           }
         } catch {
-          // canlıya geç
+          // fallback
         }
       }
 
-      if (!cancelled) {
-        await refreshLive({ force: true });
+      if (!cancelled && fallbackImg) {
+        setSrc(fallbackImg);
       }
     };
 
-    boot();
+    resolve();
     return () => {
       cancelled = true;
-      abortRef.current?.abort();
     };
-  }, [url, previewPath, applySrc, refreshLive]);
-
-  // Arka plan kontrolü (15 dk + sekme odak)
-  useEffect(() => {
-    const maybeRefresh = () => {
-      if (document.visibilityState === "hidden") return;
-      refreshLive({ force: false });
-    };
-
-    const interval = setInterval(maybeRefresh, BACKGROUND_CHECK_MS);
-    document.addEventListener("visibilitychange", maybeRefresh);
-    window.addEventListener("focus", maybeRefresh);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", maybeRefresh);
-      window.removeEventListener("focus", maybeRefresh);
-    };
-  }, [refreshLive]);
-
-  // Hata sonrası otomatik retry
-  useEffect(() => {
-    if (!failed) return undefined;
-    const timer = setTimeout(() => {
-      refreshLive({ force: true });
-    }, RETRY_MS);
-    return () => clearTimeout(timer);
-  }, [failed, refreshLive]);
+  }, [inView, previewPath, fallbackImg]);
 
   useEffect(() => {
     const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -225,9 +134,6 @@ const WebsitePreview = ({ url, title }) => {
         <span className="ml-1 truncate rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-white/50">
           {displayUrl}
         </span>
-        {checking && ready && (
-          <span className="ml-auto text-[9px] text-white/30">güncelleniyor</span>
-        )}
       </div>
 
       <div
@@ -240,19 +146,26 @@ const WebsitePreview = ({ url, title }) => {
         }}
         role="img"
         aria-label={
-          ready
-            ? `${title} canlı önizleme`
-            : failed
-              ? `${title} önizlemesi alınamadı`
-              : `${title} önizlemesi hazırlanıyor`
+          ready ? `${title} önizleme` : `${title} önizlemesi hazırlanıyor`
         }
       >
         {src && (
           <img
             ref={imageRef}
             src={src}
-            alt={`${title} sitesinin canlı görünümü`}
-            onLoad={measureScroll}
+            alt={`${title} sitesinin görünümü`}
+            onLoad={() => {
+              setReady(true);
+              requestAnimationFrame(() => measureScroll());
+            }}
+            onError={() => {
+              if (fallbackImg && src !== fallbackImg) {
+                setSrc(fallbackImg);
+                return;
+              }
+              setReady(false);
+              setSrc(null);
+            }}
             className={`absolute left-0 top-0 w-full max-w-none cursor-pointer will-change-transform ${
               ready ? "opacity-100" : "opacity-0"
             }`}
@@ -274,7 +187,6 @@ const WebsitePreview = ({ url, title }) => {
                 isActive ? "opacity-0" : "opacity-100"
               }`}
             />
-
             <div
               className={`pointer-events-none absolute inset-x-0 bottom-3 flex justify-center transition-all duration-300 ${
                 isActive
@@ -297,11 +209,7 @@ const WebsitePreview = ({ url, title }) => {
         {!ready && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950 px-4 text-center">
             <div className="h-8 w-8 animate-pulse rounded-full border border-white/10 bg-white/5" />
-            <p className="text-[11px] text-white/40">
-              {failed
-                ? "Önizleme alınamadı, yeniden deneniyor…"
-                : "Canlı önizleme hazırlanıyor…"}
-            </p>
+            <p className="text-[11px] text-white/40">Önizleme yükleniyor…</p>
           </div>
         )}
       </div>

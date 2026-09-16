@@ -26,7 +26,7 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, 
         <div className="relative p-5 z-10 flex flex-col h-full">
           <div className="relative overflow-hidden rounded-lg aspect-[16/10] bg-slate-900/80 shrink-0">
             {ProjectLink ? (
-              <WebsitePreview url={ProjectLink} title={Title} />
+              <WebsitePreview url={ProjectLink} title={Title} fallbackImg={Img} />
             ) : (
               <img
                 src={Img}

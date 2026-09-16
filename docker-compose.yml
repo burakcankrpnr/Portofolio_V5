@@ -10,6 +10,10 @@ services:
     ports:
       - "32008:80"
 
+    # Saatlik daemon bu klasöre yazar; rebuild gerekmeden önizleme güncellenir
+    volumes:
+      - ./public/previews:/usr/share/nginx/html/previews:ro
+
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=50M

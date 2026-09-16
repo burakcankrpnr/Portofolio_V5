@@ -1,4 +1,4 @@
-import { access, mkdir, readFile } from "node:fs/promises";
+import { access, mkdir, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
@@ -8,30 +8,52 @@ const rootDir = join(__dirname, "..");
 const outDir = join(rootDir, "public", "previews");
 const portfolioPath = join(rootDir, "src", "Pages", "Portofolio.jsx");
 
-const forceAll = process.argv.includes("--all");
-const missingOnly = !forceAll;
+const delayMs = Number(process.env.PREVIEW_DELAY_MS || 2500);
 
-const chromePath =
-  process.env.CHROME_PATH ||
-  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const chromeCandidates = [
+  process.env.CHROME_PATH,
+  process.env.PLAYWRIGHT_CHROME_PATH,
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+  "/snap/bin/chromium",
+].filter(Boolean);
 
 const consentSelectors = [
   "#onetrust-accept-btn-handler",
   ".cc-accept",
   ".cc-allow",
+  ".cc-dismiss",
   "button#cookie-accept",
   '[data-testid="cookie-accept"]',
+  '[aria-label="Close"]',
+  '[aria-label="Kapat"]',
+  'button[aria-label*="close" i]',
+  'button[aria-label*="kapat" i]',
+  ".modal-close",
+  ".popup-close",
+  ".close-button",
+  "button.close",
   'button:has-text("Kabul Et")',
   'button:has-text("Tümünü Kabul")',
   'button:has-text("Kabul")',
   'button:has-text("Anladım")',
   'button:has-text("Tamam")',
+  'button:has-text("Kapat")',
+  'button:has-text("Vazgeç")',
   'button:has-text("Accept all")',
   'button:has-text("Accept All")',
+  'button:has-text("Accept")',
   'button:has-text("I agree")',
   'button:has-text("Allow all")',
   'button:has-text("Allow All")',
   'button:has-text("Got it")',
+  'button:has-text("Agree")',
+  'button:has-text("Continue")',
+  'button:has-text("Devam")',
 ];
 
 const hostnameFrom = (url) => new URL(url).hostname.replace(/^www\./, "");
@@ -47,25 +69,116 @@ const fileExists = async (path) => {
   }
 };
 
+const resolveChrome = async () => {
+  for (const candidate of chromeCandidates) {
+    if (await fileExists(candidate)) return candidate;
+  }
+  return undefined;
+};
+
 const loadSitesFromPortfolio = async () => {
   const source = await readFile(portfolioPath, "utf8");
   const matches = [...source.matchAll(/Link:\s*"(https:\/\/[^"]+)"/g)];
   return [...new Set(matches.map((match) => match[1]))];
 };
 
-const dismissConsent = async (page) => {
-  for (const selector of consentSelectors) {
-    const button = page.locator(selector).first();
-    if (await button.count()) {
+const dismissPopups = async (page) => {
+  // Birkaç tur dene — geç açılan cookie / modal için
+  for (let round = 0; round < 4; round += 1) {
+    await sleep(round === 0 ? 1200 : 900);
+
+    for (const selector of consentSelectors) {
+      const button = page.locator(selector).first();
       try {
-        await button.click({ timeout: 1500 });
-        await sleep(400);
-        return;
+        if ((await button.count()) === 0) continue;
+        if (!(await button.isVisible().catch(() => false))) continue;
+        await button.click({ timeout: 1200 });
+        await sleep(350);
       } catch {
-        // try next selector
+        // sıradaki
       }
     }
+
+    await page.keyboard.press("Escape").catch(() => {});
+
+    await page
+      .evaluate(() => {
+        const hide = (el) => {
+          if (!el) return;
+          el.style.setProperty("display", "none", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+          el.style.setProperty("pointer-events", "none", "important");
+          el.setAttribute("aria-hidden", "true");
+        };
+
+        const selectors = [
+          "#onetrust-banner-sdk",
+          "#onetrust-consent-sdk",
+          ".cc-window",
+          ".cookie-banner",
+          "#cookie-notice",
+          ".osano-cm-window",
+          "[id*='cookie' i]",
+          "[class*='cookie' i]",
+          "[class*='consent' i]",
+          "[class*='popup' i]",
+          "[class*='modal' i]",
+          "[role='dialog']",
+          ".Fancybox",
+          ".fancybox-container",
+        ];
+
+        selectors.forEach((sel) => {
+          document.querySelectorAll(sel).forEach(hide);
+        });
+
+        // Tam ekran overlay / backdrop
+        document.querySelectorAll("div, section, aside").forEach((el) => {
+          const style = window.getComputedStyle(el);
+          if (style.position !== "fixed" && style.position !== "sticky") return;
+          const z = Number.parseInt(style.zIndex || "0", 10);
+          if (Number.isNaN(z) || z < 20) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.width < window.innerWidth * 0.4) return;
+          if (rect.height < 80) return;
+          const text = (el.innerText || "").toLowerCase();
+          if (
+            text.includes("cookie") ||
+            text.includes("çerez") ||
+            text.includes("kabul") ||
+            text.includes("newsletter") ||
+            text.includes("abone") ||
+            text.includes("popup") ||
+            text.includes("izin")
+          ) {
+            hide(el);
+          }
+        });
+      })
+      .catch(() => {});
   }
+};
+
+const isChallengePage = async (page) => {
+  const info = await page.evaluate(() => {
+    const title = (document.title || "").toLowerCase();
+    const body = (document.body?.innerText || "").toLowerCase().slice(0, 2500);
+    const html = document.documentElement?.innerHTML?.slice(0, 8000) || "";
+    return { title, body, html };
+  });
+
+  const blob = `${info.title}\n${info.body}\n${info.html}`;
+  return (
+    blob.includes("just a moment") ||
+    blob.includes("perform security verification") ||
+    blob.includes("verify you are human") ||
+    blob.includes("cf-browser-verification") ||
+    blob.includes("cf-challenge") ||
+    blob.includes("challenge-platform") ||
+    blob.includes("attention required") ||
+    blob.includes("checking your browser") ||
+    blob.includes("enable javascript and cookies")
+  );
 };
 
 const preparePage = async (page) => {
@@ -84,11 +197,15 @@ const preparePage = async (page) => {
         filter: none !important;
       }
       #onetrust-banner-sdk,
+      #onetrust-consent-sdk,
       .cc-window,
       .cookie-banner,
       #cookie-notice,
-      .osano-cm-window {
+      .osano-cm-window,
+      [role="dialog"],
+      .fancybox-container {
         display: none !important;
+        visibility: hidden !important;
       }
     `,
   });
@@ -144,7 +261,7 @@ const preparePage = async (page) => {
     }
 
     window.scrollTo(0, 0);
-    await pause(800);
+    await pause(1000);
   });
 };
 
@@ -158,62 +275,121 @@ const capture = async (browser, url) => {
 
   page.setDefaultTimeout(45000);
 
+  const file = join(outDir, `${hostnameFrom(url)}.jpg`);
+  const tempFile = `${file}.tmp.jpg`;
+
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
+    await sleep(2000);
+
+    // Challenge varsa biraz bekle (bazen geçer)
+    if (await isChallengePage(page)) {
+      await sleep(8000);
+      await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+    }
+
+    if (await isChallengePage(page)) {
+      throw new Error("Cloudflare/security challenge — eski önizleme korunuyor");
+    }
+
+    await dismissPopups(page);
     await sleep(1500);
-    await dismissConsent(page);
+    await dismissPopups(page);
     await preparePage(page);
 
-    const file = join(outDir, `${hostnameFrom(url)}.jpg`);
+    if (await isChallengePage(page)) {
+      throw new Error("Challenge sonrası içerik yok — kayıt atlandı");
+    }
+
     await page.screenshot({
-      path: file,
+      path: tempFile,
       fullPage: true,
       type: "jpeg",
       quality: 82,
     });
+
+    await rename(tempFile, file);
     return file;
+  } catch (error) {
+    await unlink(tempFile).catch(() => {});
+    throw error;
   } finally {
     await page.close();
   }
 };
 
-await mkdir(outDir, { recursive: true });
+export const capturePortfolioPreviews = async (options = {}) => {
+  const forceAll =
+    options.all === true || process.argv.includes("--all");
+  const missingOnly = !forceAll;
 
-const sites = await loadSitesFromPortfolio();
-const queue = [];
+  await mkdir(outDir, { recursive: true });
 
-for (const url of sites) {
-  const file = join(outDir, `${hostnameFrom(url)}.jpg`);
-  if (missingOnly && (await fileExists(file))) {
-    console.log(`skip ${hostnameFrom(url)}.jpg (exists)`);
-    continue;
+  const sites = await loadSitesFromPortfolio();
+  const queue = [];
+
+  for (const url of sites) {
+    const file = join(outDir, `${hostnameFrom(url)}.jpg`);
+    if (missingOnly && (await fileExists(file))) {
+      console.log(`skip ${hostnameFrom(url)}.jpg (exists)`);
+      continue;
+    }
+    queue.push(url);
   }
-  queue.push(url);
-}
 
-if (queue.length === 0) {
-  console.log("All preview images are present. Nothing to capture.");
-  process.exit(0);
-}
+  if (queue.length === 0) {
+    console.log("All preview images are present. Nothing to capture.");
+    return { captured: 0, failed: 0, skipped: sites.length };
+  }
 
-console.log(`Capturing ${queue.length} missing preview(s)...`);
+  console.log(`Capturing ${queue.length} preview(s) sequentially...`);
 
-const browser = await chromium.launch({
-  executablePath: chromePath,
-  headless: true,
-  args: ["--disable-dev-shm-usage", "--no-sandbox"],
-});
+  const executablePath = await resolveChrome();
+  const browser = await chromium.launch({
+    executablePath,
+    headless: true,
+    args: ["--disable-dev-shm-usage", "--no-sandbox"],
+  });
 
-for (const url of queue) {
-  process.stdout.write(`Capturing ${url} ... `);
+  let captured = 0;
+  let failed = 0;
+
   try {
-    await capture(browser, url);
-    console.log(`ok (${hostnameFrom(url)}.jpg)`);
-  } catch (error) {
-    console.log(`FAIL: ${error.message}`);
+    for (const url of queue) {
+      process.stdout.write(`Capturing ${url} ... `);
+      try {
+        await capture(browser, url);
+        captured += 1;
+        console.log(`ok (${hostnameFrom(url)}.jpg)`);
+      } catch (error) {
+        failed += 1;
+        console.log(`FAIL: ${error.message}`);
+      }
+      await sleep(delayMs);
+    }
+  } finally {
+    await browser.close();
   }
-}
 
-await browser.close();
-console.log("Preview capture finished.");
+  console.log(`Preview capture finished. ok=${captured} fail=${failed}`);
+  return { captured, failed, skipped: sites.length - queue.length };
+};
+
+const isDirectRun = (() => {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return fileURLToPath(import.meta.url).replace(/\\/g, "/") ===
+      entry.replace(/\\/g, "/");
+  } catch {
+    return entry.includes("capture-previews");
+  }
+})();
+
+if (isDirectRun) {
+  capturePortfolioPreviews().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
