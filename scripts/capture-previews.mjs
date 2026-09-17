@@ -6,7 +6,7 @@ import { chromium } from "playwright-core";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 const outDir = join(rootDir, "public", "previews");
-const portfolioPath = join(rootDir, "src", "Pages", "Portofolio.jsx");
+const portfolioPath = join(rootDir, "src", "data", "projects.js");
 
 const forceAll = process.argv.includes("--all");
 const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));

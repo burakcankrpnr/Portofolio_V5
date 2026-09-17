@@ -2,6 +2,7 @@ import React, { useEffect, memo, useMemo } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { PROJECT_COUNT } from "../data/projects"
 
 // Memoized Components
 const Header = memo(() => (
@@ -113,8 +114,8 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
 ));
 
 const AboutPage = () => {
-  // Proje sayısı (Portföy bölümündeki projelerle eşleşir)
-  const projectCount = 10;
+  // Portföy listesindeki gerçek proje sayısı
+  const projectCount = PROJECT_COUNT;
 
   // AOS initialization
   useEffect(() => {
