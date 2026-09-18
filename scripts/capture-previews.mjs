@@ -31,48 +31,6 @@ const chromeCandidates = [
   "/snap/bin/chromium",
 ].filter(Boolean);
 
-const consentSelectors = [
-  "#onetrust-accept-btn-handler",
-  ".cc-accept",
-  ".cc-allow",
-  ".cc-dismiss",
-  "button#cookie-accept",
-  '[data-testid="cookie-accept"]',
-  '[aria-label="Close"]',
-  '[aria-label="Kapat"]',
-  'button[aria-label*="close" i]',
-  'button[aria-label*="kapat" i]',
-  ".modal-close",
-  ".popup-close",
-  ".close-button",
-  "button.close",
-  'button:has-text("Tümünü kabul et")',
-  'button:has-text("Tümünü Kabul Et")',
-  'button:has-text("Sadece gerekli")',
-  'button:has-text("Reddet")',
-  'button:has-text("Tercihler")',
-  'button:has-text("Accept Cookies")',
-  'button:has-text("Reject")',
-  'button:has-text("Decline")',
-  'button:has-text("Kabul Et")',
-  'button:has-text("Tümünü Kabul")',
-  'button:has-text("Kabul")',
-  'button:has-text("Anladım")',
-  'button:has-text("Tamam")',
-  'button:has-text("Kapat")',
-  'button:has-text("Vazgeç")',
-  'button:has-text("Accept all")',
-  'button:has-text("Accept All")',
-  'button:has-text("Accept")',
-  'button:has-text("I agree")',
-  'button:has-text("Allow all")',
-  'button:has-text("Allow All")',
-  'button:has-text("Got it")',
-  'button:has-text("Agree")',
-  'button:has-text("Continue")',
-  'button:has-text("Devam")',
-];
-
 const hostnameFrom = (url) => new URL(url).hostname.replace(/^www\./, "");
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -99,83 +57,6 @@ const loadSitesFromPortfolio = async () => {
   return [...new Set(matches.map((match) => match[1]))];
 };
 
-const dismissPopups = async (page) => {
-  // Birkaç tur dene — geç açılan cookie / modal için
-  for (let round = 0; round < 4; round += 1) {
-    await sleep(round === 0 ? 1200 : 900);
-
-    for (const selector of consentSelectors) {
-      const button = page.locator(selector).first();
-      try {
-        if ((await button.count()) === 0) continue;
-        if (!(await button.isVisible().catch(() => false))) continue;
-        await button.click({ timeout: 1200 });
-        await sleep(350);
-      } catch {
-        // sıradaki
-      }
-    }
-
-    await page.keyboard.press("Escape").catch(() => {});
-
-    await page
-      .evaluate(() => {
-        const hide = (el) => {
-          if (!el) return;
-          el.style.setProperty("display", "none", "important");
-          el.style.setProperty("visibility", "hidden", "important");
-          el.style.setProperty("pointer-events", "none", "important");
-          el.setAttribute("aria-hidden", "true");
-        };
-
-        const selectors = [
-          "#onetrust-banner-sdk",
-          "#onetrust-consent-sdk",
-          ".cc-window",
-          ".cookie-banner",
-          "#cookie-notice",
-          ".osano-cm-window",
-          "[id*='cookie' i]",
-          "[class*='cookie' i]",
-          "[class*='consent' i]",
-          "[class*='popup' i]",
-          "[class*='modal' i]",
-          "[role='dialog']",
-          ".Fancybox",
-          ".fancybox-container",
-        ];
-
-        selectors.forEach((sel) => {
-          document.querySelectorAll(sel).forEach(hide);
-        });
-
-        // Tam ekran overlay / backdrop
-        document.querySelectorAll("div, section, aside").forEach((el) => {
-          const style = window.getComputedStyle(el);
-          if (style.position !== "fixed" && style.position !== "sticky") return;
-          const z = Number.parseInt(style.zIndex || "0", 10);
-          if (Number.isNaN(z) || z < 20) return;
-          const rect = el.getBoundingClientRect();
-          if (rect.width < window.innerWidth * 0.4) return;
-          if (rect.height < 80) return;
-          const text = (el.innerText || "").toLowerCase();
-          if (
-            text.includes("cookie") ||
-            text.includes("çerez") ||
-            text.includes("kabul") ||
-            text.includes("newsletter") ||
-            text.includes("abone") ||
-            text.includes("popup") ||
-            text.includes("izin")
-          ) {
-            hide(el);
-          }
-        });
-      })
-      .catch(() => {});
-  }
-};
-
 const isChallengePage = async (page) => {
   const info = await page.evaluate(() => {
     const title = (document.title || "").toLowerCase();
@@ -198,36 +79,20 @@ const isChallengePage = async (page) => {
   );
 };
 
+/** Siteyi doğal halinde bırak — popup kapatma / overlay gizleme yok */
 const preparePage = async (page) => {
   await page.addStyleTag({
     content: `
-      *, *::before, *::after {
-        animation: none !important;
-        transition: none !important;
-        scroll-behavior: auto !important;
-      }
       [data-aos],
       [data-aos].aos-init,
       [data-aos].aos-animate,
-      .aos-init,
-      [data-scroll],
-      .swiper-slide,
+      .aos-init {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
       img {
         opacity: 1 !important;
         visibility: visible !important;
-        transform: none !important;
-        filter: none !important;
-      }
-      #onetrust-banner-sdk,
-      #onetrust-consent-sdk,
-      .cc-window,
-      .cookie-banner,
-      #cookie-notice,
-      .osano-cm-window,
-      [role="dialog"],
-      .fancybox-container {
-        display: none !important;
-        visibility: hidden !important;
       }
     `,
   });
@@ -237,13 +102,12 @@ const preparePage = async (page) => {
 
     document.querySelectorAll("img").forEach((img) => {
       img.loading = "eager";
-      img.decoding = "sync";
       const lazySrc =
         img.dataset.src ||
         img.dataset.lazySrc ||
         img.dataset.original ||
         img.getAttribute("data-lazy");
-      if (lazySrc && !img.src.includes(lazySrc)) {
+      if (lazySrc && !String(img.src || "").includes(lazySrc)) {
         img.src = lazySrc;
       }
     });
@@ -258,9 +122,9 @@ const preparePage = async (page) => {
     for (let i = 0; i < 40; i += 1) {
       const height = maxY();
       window.scrollBy(0, Math.round(window.innerHeight * 0.7));
-      await pause(350);
+      await pause(300);
       if (window.scrollY + window.innerHeight >= height - 8) {
-        await pause(700);
+        await pause(500);
         if (maxY() <= height && height <= previous) break;
       }
       previous = height;
@@ -273,7 +137,7 @@ const preparePage = async (page) => {
           new Promise((resolve) => {
             img.addEventListener("load", resolve, { once: true });
             img.addEventListener("error", resolve, { once: true });
-            setTimeout(resolve, 8000);
+            setTimeout(resolve, 6000);
           })
       )
     );
@@ -282,25 +146,8 @@ const preparePage = async (page) => {
       await document.fonts.ready;
     }
 
-    // Full-page screenshot'ta sticky/fixed header kaymasını engelle
     window.scrollTo(0, 0);
-    await pause(600);
-
-    document.querySelectorAll("body *").forEach((el) => {
-      const style = window.getComputedStyle(el);
-      if (style.position !== "fixed" && style.position !== "sticky") return;
-      const rect = el.getBoundingClientRect();
-      if (rect.height <= 0 || rect.width <= 0) return;
-      if (rect.top > 140) return;
-      if (rect.height > window.innerHeight * 0.45) return;
-      el.style.setProperty("position", "relative", "important");
-      el.style.setProperty("top", "0", "important");
-      el.style.setProperty("bottom", "auto", "important");
-      el.style.setProperty("transform", "none", "important");
-      el.style.setProperty("inset", "auto", "important");
-    });
-
-    await pause(900);
+    await pause(1200);
   });
 };
 
@@ -320,9 +167,8 @@ const capture = async (browser, url) => {
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
-    await sleep(2000);
+    await sleep(2500);
 
-    // Challenge varsa biraz bekle (bazen geçer)
     if (await isChallengePage(page)) {
       await sleep(8000);
       await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
@@ -332,9 +178,6 @@ const capture = async (browser, url) => {
       throw new Error("Cloudflare/security challenge — eski önizleme korunuyor");
     }
 
-    await dismissPopups(page);
-    await sleep(1500);
-    await dismissPopups(page);
     await preparePage(page);
 
     if (await isChallengePage(page)) {
