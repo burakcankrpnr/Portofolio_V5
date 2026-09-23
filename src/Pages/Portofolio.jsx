@@ -311,6 +311,10 @@ export default function FullWidthTabs() {
                         id={website.id}
                         Company={website.Company}
                         CompanyLink={website.CompanyLink}
+                        AppStoreLink={website.AppStoreLink}
+                        GooglePlayLink={website.GooglePlayLink}
+                        AppStoreBadge={website.AppStoreBadge}
+                        GooglePlayBadge={website.GooglePlayBadge}
                       />
                     </div>
                   ))}

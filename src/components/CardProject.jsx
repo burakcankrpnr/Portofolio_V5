@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import WebsitePreview from './WebsitePreview';
 
-const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, CompanyLink }) => {
+const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, CompanyLink, AppStoreLink, GooglePlayLink, AppStoreBadge, GooglePlayBadge }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   const handleLiveDemo = (e) => {
@@ -12,7 +12,7 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, 
     }
   };
 
-  const maxLength = 120;
+  const maxLength = 165;
   const shouldTruncate = Description.length > maxLength;
   const displayText = isExpanded || !shouldTruncate 
     ? Description 
@@ -66,26 +66,27 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, 
               </p>
             </div>
             
-            <div className="pt-4 flex items-center justify-between mt-auto">
-              <div className="flex items-center gap-4">
-                {shouldTruncate && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors duration-200 group/btn"
-                  >
-                    <span>
-                      {isExpanded ? "Daha Az Göster" : "Devamını Oku"}
-                    </span>
-                    {isExpanded ? (
-                      <ChevronUp className="w-3 h-3 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3 group-hover/btn:translate-y-0.5 transition-transform duration-200" />
-                    )}
-                  </button>
-                )}
-              </div>
-              
-              {ProjectLink ? (
+<div className="pt-4 flex flex-col gap-3 mt-auto">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {shouldTruncate && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors duration-200 group/btn"
+            >
+              <span>
+                {isExpanded ? "Daha Az Göster" : "Devamını Oku"}
+              </span>
+              {isExpanded ? (
+                <ChevronUp className="w-3 h-3 group-hover/btn:-translate-y-0.5 transition-transform duration-200" />
+              ) : (
+                <ChevronDown className="w-3 h-3 group-hover/btn:translate-y-0.5 transition-transform duration-200" />
+              )}
+            </button>
+          )}
+        </div>
+        
+        {ProjectLink ? (
                 <a
                   href={ProjectLink || "#"}
                   target="_blank"
@@ -98,6 +99,48 @@ const CardProject = ({ Img, Title, Description, Link: ProjectLink, id, Company, 
                 </a>
               ) : (
                 <span className="text-gray-500 text-sm">Web Sitesi Mevcut Değil</span>
+              )}
+            </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-3">
+              {AppStoreLink || GooglePlayLink ? (
+                <div className="flex items-center justify-center gap-4">
+                  {AppStoreLink && (
+                    <a
+                      href={AppStoreLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="App Store"
+                      className="transition-transform duration-200 hover:scale-105"
+                    >
+                      <img
+                        src={AppStoreBadge}
+                        alt="App Store'dan İndir"
+                        className="h-9 w-auto"
+                      />
+                    </a>
+                  )}
+                  {GooglePlayLink && (
+                    <a
+                      href={GooglePlayLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Google Play"
+                      className="transition-transform duration-200 hover:scale-105"
+                    >
+                      <img
+                        src={GooglePlayBadge}
+                        alt="Google Play'den İndir"
+                        className="h-9 w-auto"
+                      />
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div />
+                </div>
               )}
             </div>
           </div>

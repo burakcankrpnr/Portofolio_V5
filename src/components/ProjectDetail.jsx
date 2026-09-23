@@ -202,6 +202,39 @@ const ProjectDetails = () => {
                 </a>
               </div>
 
+              {(project.AppStoreLink || project.GooglePlayLink) && (
+                <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+                  {project.AppStoreLink && (
+                    <a
+                      href={project.AppStoreLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-transform duration-200 hover:scale-105"
+                    >
+                      <img
+                        src={project.AppStoreBadge}
+                        alt="App Store'dan İndir"
+                        className="h-10 md:h-12 w-auto"
+                      />
+                    </a>
+                  )}
+                  {project.GooglePlayLink && (
+                    <a
+                      href={project.GooglePlayLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-transform duration-200 hover:scale-105"
+                    >
+                      <img
+                        src={project.GooglePlayBadge}
+                        alt="Google Play'den İndir"
+                        className="h-10 md:h-12 w-auto"
+                      />
+                    </a>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-4 md:space-y-6">
                 <h3 className="text-lg md:text-xl font-semibold text-white/90 mt-[3rem] md:mt-0 flex items-center gap-2 md:gap-3">
                   <Code2 className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
