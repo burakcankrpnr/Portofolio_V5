@@ -11,6 +11,7 @@
     "build": "node scripts/build-with-previews.mjs",
     "build:only": "vite build",
     "lint": "eslint .",
+    "test": "vitest run",
     "preview": "vite preview",
     "capture-previews": "node scripts/capture-previews.mjs",
     "capture-previews:all": "node scripts/capture-previews.mjs --all",
@@ -34,6 +35,8 @@
     "framer-motion": "^11.15.0",
     "gsap": "^3.12.5",
     "lucide-react": "^0.454.0",
+    "pdfjs-dist": "^6.4.299",
+    "pdfmake": "^0.3.11",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -44,7 +47,8 @@
     "sweetalert2": "^11.15.0",
     "swiper": "^12.1.4",
     "tailwind-merge": "^2.5.5",
-    "typewriter-effect": "^2.21.0"
+    "typewriter-effect": "^2.21.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
@@ -61,7 +65,8 @@
     "postcss": "^8.5.28",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.14",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vitest": "^5.0.4"
   },
   "overrides": {
     "@babel/runtime": ">=7.26.10",

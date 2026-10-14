@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import Home from "./Pages/Home";
@@ -10,6 +10,7 @@ import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
 import WelcomeScreen from "./Pages/WelcomeScreen";
 import NotFound from "./Pages/NotFound";
+import TeklifOsRoute from "./teklifos/TeklifOsRoute";
 
 const SITE_ORIGIN = "https://burakcankorpinar.dev";
 
@@ -161,6 +162,11 @@ const ProjectPageLayout = () => (
   </>
 );
 
+function LegacyTeklifRedirect() {
+  const { pathname, search } = useLocation();
+  return <Navigate to={`${pathname.replace(/^\/teklifos/, "/buse")}${search}`} replace />;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -170,6 +176,8 @@ function App() {
         <Route path="/portfolio" element={<LandingPage />} />
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/project/:id" element={<ProjectPageLayout />} />
+        <Route path="/buse/*" element={<TeklifOsRoute />} />
+        <Route path="/teklifos/*" element={<LegacyTeklifRedirect />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
