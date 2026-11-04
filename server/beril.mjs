@@ -1,3 +1,4 @@
+import "./polyfills.mjs";
 import http from "node:http";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

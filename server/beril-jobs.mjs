@@ -1,3 +1,4 @@
+import "./polyfills.mjs";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile, readdir, unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
