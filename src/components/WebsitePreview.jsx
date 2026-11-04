@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { previewFileFromUrl } from "../lib/preview";
 
-const previewFileFromUrl = (url) => {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    return `/previews/${host}.jpg`;
-  } catch {
-    return null;
-  }
-};
 
 /**
  * Yerel /previews/*.jpg gösterir.
@@ -94,12 +87,12 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
   })();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-slate-950">
-      <div className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-slate-900/90 px-3 py-1.5">
-        <span className="h-2 w-2 rounded-full bg-red-400/80" />
-        <span className="h-2 w-2 rounded-full bg-amber-400/80" />
-        <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-        <span className="ml-1 truncate rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-white/50">
+    <div className="flex h-full flex-col overflow-hidden bg-murekkep">
+      <div className="flex shrink-0 items-center gap-2 border-b border-cizgi bg-gece px-3 py-1.5">
+        <span className="h-2 w-2 rounded-full bg-white/20" />
+        <span className="h-2 w-2 rounded-full bg-white/20" />
+        <span className="h-2 w-2 rounded-full bg-white/20" />
+        <span className="ml-1 truncate rounded-md bg-white/5 px-2 py-0.5 text-[11px] text-sis">
           {displayUrl}
         </span>
       </div>
@@ -182,7 +175,7 @@ const WebsitePreview = ({ url, title, fallbackImg }) => {
         )}
 
         {!ready && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950 px-4 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-murekkep px-4 text-center">
             <div className="h-8 w-8 animate-pulse rounded-full border border-white/10 bg-white/5" />
             <p className="text-[11px] text-white/40">Önizleme yükleniyor…</p>
           </div>

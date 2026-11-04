@@ -1,14 +1,20 @@
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
-import AnimatedBackground from "./components/Background";
 import Navbar from "./components/Navbar";
 import Portofolio from "./Pages/Portofolio";
 import ContactPage from "./Pages/Contact";
 import ProjectDetails from "./components/ProjectDetail";
-import WelcomeScreen from "./Pages/WelcomeScreen";
+import Footer from "./components/Footer";
+import Intro from "./components/Intro";
+import {
+  createIntroGate,
+  prefersReducedMotion,
+  scrollToId,
+  useSmoothScroll,
+} from "./lib/motion";
 import NotFound from "./Pages/NotFound";
 import TeklifOsRoute from "./teklifos/TeklifOsRoute";
 
@@ -90,12 +96,7 @@ const useSectionSeo = () => {
   useEffect(() => {
     if (pathname === "/") return undefined;
 
-    const timer = setTimeout(() => {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        window.scrollTo({ top: section.offsetTop - 100, behavior: "smooth" });
-      }
-    }, 120);
+    const timer = setTimeout(() => scrollToId(sectionId), 120);
 
     return () => clearTimeout(timer);
   }, [pathname, sectionId]);
@@ -105,41 +106,25 @@ const useSectionSeo = () => {
 
 const LandingPage = () => {
   const { pathname } = useLocation();
-  const isHome = pathname === "/";
-  const [showWelcome, setShowWelcome] = useState(isHome);
+  const [gate] = useState(() =>
+    createIntroGate(pathname === "/" && !prefersReducedMotion())
+  );
+  const [showIntro, setShowIntro] = useState(gate.active);
 
   useSectionSeo();
+  useSmoothScroll();
 
   return (
     <>
-      {showWelcome && (
-        <WelcomeScreen onLoadingComplete={() => setShowWelcome(false)} />
-      )}
-
-      <div
-        className={
-          showWelcome ? "pointer-events-none overflow-hidden h-screen" : undefined
-        }
-      >
-        <Navbar />
-        <AnimatedBackground />
-        <Home />
+      {showIntro && <Intro onReveal={gate.open} onDone={() => setShowIntro(false)} />}
+      <Navbar />
+      <main>
+        <Home ready={gate.wait} />
         <About />
         <Portofolio />
         <ContactPage />
-        <footer>
-          <center>
-            <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
-            <span className="block text-sm pb-4 text-gray-500 text-center dark:text-gray-400">
-              © 2026{" "}
-              <a href="https://flowbite.com/" className="hover:underline">
-                Burak Can Körpınar ™
-              </a>
-              . All Rights Reserved.
-            </span>
-          </center>
-        </footer>
-      </div>
+      </main>
+      <Footer />
     </>
   );
 };
@@ -147,18 +132,7 @@ const LandingPage = () => {
 const ProjectPageLayout = () => (
   <>
     <ProjectDetails />
-    <footer>
-      <center>
-        <hr className="my-3 border-gray-400 opacity-15 sm:mx-auto lg:my-6 text-center" />
-        <span className="block text-sm pb-4 text-gray-500 text-center dark:text-gray-400">
-          © 2026{" "}
-          <a href="https://flowbite.com/" className="hover:underline">
-            Burak Can Körpınar™
-          </a>
-          . All Rights Reserved.
-        </span>
-      </center>
-    </footer>
+    <Footer />
   </>
 );
 

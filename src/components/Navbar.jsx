@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { lockScroll, scrollToId } from "../lib/motion";
 
 const NAV_LINKS = [
-  { path: "/", hash: "#Home", id: "Home", label: "Ana Sayfa" },
-  { path: "/about", hash: "#About", id: "About", label: "Hakkımda" },
-  { path: "/portfolio", hash: "#Portofolio", id: "Portofolio", label: "Portfolyom" },
-  { path: "/contact", hash: "#Contact", id: "Contact", label: "İletişim" },
+  { path: "/about", id: "About", label: "Hakkımda" },
+  { path: "/portfolio", id: "Portofolio", label: "İşler" },
+  { path: "/contact", id: "Contact", label: "İletişim" },
 ];
 
 const Navbar = () => {
@@ -21,148 +21,124 @@ const Navbar = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-      const sections = NAV_LINKS.map((item) => {
-        const section = document.querySelector(item.hash);
-        if (section) {
-          return {
-            id: item.id,
-            offset: section.offsetTop - 550,
-            height: section.offsetHeight,
-          };
-        }
-        return null;
-      }).filter(Boolean);
-
-      const currentPosition = window.scrollY;
-      const active = sections.find(
-        (section) =>
-          currentPosition >= section.offset &&
-          currentPosition < section.offset + section.height
-      );
-
-      if (active) setActiveSection(active.id);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+      const probe = window.scrollY + window.innerHeight * 0.4;
+      let current = "Home";
+      for (const item of NAV_LINKS) {
+        const el = document.getElementById(item.id);
+        if (el && el.offsetTop <= probe) current = item.id;
+      }
+      setActiveSection(current);
     };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    lockScroll(isOpen);
+    if (!isOpen) return undefined;
+    const onKey = (e) => e.key === "Escape" && setIsOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
-  const scrollToSection = (hash) => {
-    const section = document.querySelector(hash);
-    if (section) {
-      window.scrollTo({
-        top: section.offsetTop - 100,
-        behavior: "smooth",
-      });
-    }
+  useEffect(() => () => lockScroll(false), []);
+
+  const go = (id) => {
     setIsOpen(false);
+    // menü kapanıp kaydırma kilidi kalktıktan sonra kaydır
+    requestAnimationFrame(() => scrollToId(id, id === "Home" ? { offset: 0 } : undefined));
   };
 
   return (
-    <nav
-      className={`fixed w-full top-0 z-50 transition-all duration-500 ${
-        isOpen
-          ? "bg-[#030014] opacity-100"
-          : scrolled
-            ? "bg-[#030014]/50 backdrop-blur-xl"
-            : "bg-transparent"
+    <>
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled || isOpen
+          ? "border-b border-cizgi bg-gece/85 backdrop-blur-md"
+          : "border-b border-transparent"
       }`}
     >
-      <div className="mx-auto px-4 sm:px-6 lg:px-[10%]">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
+      <nav className="shell flex h-16 items-center justify-between md:h-[72px]" aria-label="Ana menü">
+        <Link
+          to="/"
+          onClick={() => go("Home")}
+          className="display text-lg font-semibold text-kar"
+          style={{ fontVariationSettings: '"wdth" 85' }}
+        >
+          Burak Can Körpınar
+        </Link>
+
+        <div className="hidden items-center gap-8 md:flex">
+          {NAV_LINKS.map((item) => (
             <Link
-              to="/"
-              onClick={() => scrollToSection("#Home")}
-              className="text-xl font-bold bg-gradient-to-r from-[#a855f7] to-[#6366f1] bg-clip-text text-transparent"
-            >
-              Burak Can Körpınar
-            </Link>
-          </div>
-
-          <div className="hidden md:block">
-            <div className="ml-8 flex items-center space-x-8">
-              {NAV_LINKS.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  onClick={() => scrollToSection(item.hash)}
-                  className="group relative px-1 py-2 text-sm font-medium"
-                >
-                  <span
-                    className={`relative z-10 transition-colors duration-300 ${
-                      activeSection === item.id
-                        ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
-                        : "text-[#e2d3fd] group-hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                  <span
-                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] transform origin-left transition-transform duration-300 ${
-                      activeSection === item.id
-                        ? "scale-x-100"
-                        : "scale-x-0 group-hover:scale-x-100"
-                    }`}
-                  />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`relative p-2 text-[#e2d3fd] hover:text-white transition-transform duration-300 ease-in-out transform ${
-                isOpen ? "rotate-90 scale-125" : "rotate-0 scale-100"
+              key={item.id}
+              to={item.path}
+              onClick={() => go(item.id)}
+              aria-current={activeSection === item.id ? "true" : undefined}
+              className={`text-[15px] transition-colors duration-200 ${
+                activeSection === item.id ? "text-kayisi" : "text-sis hover:text-kar"
               }`}
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+              {item.label}
+            </Link>
+          ))}
+          <Link to="/contact" onClick={() => go("Contact")} className="btn-primary h-10 px-5 text-sm">
+            Projeni konuşalım
+          </Link>
         </div>
-      </div>
+
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          className="-mr-2 p-2 text-kar md:hidden"
+          aria-expanded={isOpen}
+          aria-controls="mobile-menu"
+          aria-label={isOpen ? "Menüyü kapat" : "Menüyü aç"}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </nav>
+    </header>
 
       <div
-        className={`md:hidden h-2/5 fixed inset-0 bg-[#030014] transition-all duration-300 ease-in-out ${
-          isOpen
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-[-100%] pointer-events-none"
+        id="mobile-menu"
+        className={`fixed inset-x-0 bottom-0 top-16 z-40 bg-gece transition-[opacity,visibility] duration-300 md:hidden ${
+          isOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
-        style={{ top: "64px" }}
       >
-        <div className="flex flex-col h-full">
-          <div className="px-4 py-6 space-y-4 flex-1 ">
-            {NAV_LINKS.map((item, index) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                onClick={() => scrollToSection(item.hash)}
-                className={`block px-4 py-3 text-lg font-medium transition-all duration-300 ease ${
-                  activeSection === item.id
-                    ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent font-semibold"
-                    : "text-[#e2d3fd] hover:text-white"
-                }`}
+        <div className="shell flex h-full flex-col justify-between pb-10 pt-8">
+          <ul className="space-y-2">
+            {[{ path: "/", id: "Home", label: "Ana sayfa" }, ...NAV_LINKS].map((item, i) => (
+              <li
+                key={item.id}
+                className="transition-[transform,opacity] duration-500"
                 style={{
-                  transitionDelay: `${index * 100}ms`,
-                  transform: isOpen ? "translateX(0)" : "translateX(50px)",
+                  transitionDelay: isOpen ? `${80 + i * 50}ms` : "0ms",
+                  transform: isOpen ? "none" : "translateY(12px)",
                   opacity: isOpen ? 1 : 0,
                 }}
               >
-                {item.label}
-              </Link>
+                <Link
+                  to={item.path}
+                  onClick={() => go(item.id)}
+                  className={`display block py-2 text-5xl font-semibold ${
+                    activeSection === item.id ? "text-kayisi" : "text-kar"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
+          <a href="mailto:burikcankorpinar@gmail.com" className="text-sis link-underline">
+            burikcankorpinar@gmail.com
+          </a>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 

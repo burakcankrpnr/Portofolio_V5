@@ -1,242 +1,157 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
-import { Github, Linkedin, Mail, ExternalLink, Instagram, Sparkles } from "lucide-react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { memo, useRef } from "react";
+import PropTypes from "prop-types";
+import { myWebsites } from "../data/projects";
+import { hostOf, previewFileFromUrl } from "../lib/preview";
+import { gsap, scrollToId, useGSAP } from "../lib/motion";
 
-// Memoized Components
-const StatusBadge = memo(() => (
-  <div className="inline-block animate-float lg:mx-0" data-aos="zoom-in" data-aos-delay="400">
-    <div className="relative group">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#6366f1] to-[#a855f7] rounded-full blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-      <div className="relative px-3 sm:px-4 py-2 rounded-full bg-black/40 backdrop-blur-xl border border-white/10">
-        <span className="bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-transparent bg-clip-text sm:text-sm text-[0.7rem] font-medium flex items-center">
-          <Sparkles className="sm:w-4 sm:h-4 w-3 h-3 mr-2 text-blue-400" />
-          Yeniliğe Hazırım!
-        </span>
-      </div>
-    </div>
-  </div>
-));
+const NAME_LINES = ["Burak Can", "Körpınar"];
+const STRIP = myWebsites.filter((p) => p.Link);
 
-const MainTitle = memo(() => (
-  <div className="space-y-2" data-aos="fade-up" data-aos-delay="600">
-    <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
-      <span className="relative inline-block">
-        <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
-        <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-          Burak Can Körpınar
-        </span>
-      </span>
-      <br />
-      <span className="relative inline-block mt-2">
-        <span className="absolute -inset-2 bg-gradient-to-r from-[#6366f1] to-[#a855f7] blur-2xl opacity-20"></span>
-        <span className="relative bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
-          Full Stack Geliştirici
-        </span>
-      </span>
-    </h1>
-  </div>
-));
+const jump = (id) => (e) => {
+  e.preventDefault();
+  scrollToId(id);
+};
 
-const TechStack = memo(({ tech }) => (
-  <div className="px-4 py-2 hidden sm:block rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm text-gray-300 hover:bg-white/10 transition-colors">
-    {tech}
-  </div>
-));
+const Home = ({ ready = Promise.resolve() }) => {
+  const root = useRef(null);
 
-const CTAButton = memo(({ href, text, icon: Icon }) => (
-  <a href={href}>
-    <button className="group relative w-[160px]">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#4f52c9] to-[#8644c5] rounded-xl opacity-50 blur-md group-hover:opacity-90 transition-all duration-700"></div>
-      <div className="relative h-11 bg-[#030014] backdrop-blur-xl rounded-lg border border-white/10 leading-none overflow-hidden">
-        <div className="absolute inset-0 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 bg-gradient-to-r from-[#4f52c9]/20 to-[#8644c5]/20"></div>
-        <span className="absolute inset-0 flex items-center justify-center gap-2 text-sm group-hover:gap-3 transition-all duration-300">
-          <span className="bg-gradient-to-r from-gray-200 to-white bg-clip-text text-transparent font-medium z-10">
-            {text}
-          </span>
-          <Icon className={`w-4 h-4 text-gray-200 ${
-            text === "Contact" ? "group-hover:translate-x-1" : "group-hover:rotate-45"
-          } transform transition-all duration-300 z-10`} />
-        </span>
-      </div>
-    </button>
-  </a>
-));
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
 
-const SocialLink = memo(({ icon: Icon, link }) => (
-  <a href={link} target="_blank" rel="noopener noreferrer">
-    <button className="group relative p-3">
-      <div className="absolute inset-0 bg-gradient-to-r from-[#6366f1] to-[#a855f7] rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-300"></div>
-      <div className="relative rounded-xl bg-black/50 backdrop-blur-xl p-2 flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all duration-300">
-        <Icon className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-      </div>
-    </button>
-  </a>
-));
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // Açılış perdesi varsa, perde kalkmaya başlayınca oynat
+        const tl = gsap.timeline({ paused: true, delay: 0.15, defaults: { ease: "expo.out" } });
+        ready.then(() => tl.play());
+        tl.from(".hero-char", { yPercent: 118, duration: 1.15, stagger: 0.032 })
+          .from(
+            ".hero-fade",
+            { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.08, ease: "power3.out" },
+            "-=0.75"
+          )
+          .from(
+            ".hero-shot",
+            { autoAlpha: 0, y: 48, duration: 1, stagger: 0.06, ease: "power3.out" },
+            "-=0.7"
+          );
 
-// Constants
-const TYPING_SPEED = 100;
-const ERASING_SPEED = 50;
-const PAUSE_DURATION = 2000;
-const WORDS = ["Full-Stack Geliştirici", "Web ve Mobil Çözümler", "Teknoloji Tutkunu"];
-const TECH_STACK = ["React", "Javascript", "Node.js", "Tailwind", "MySQL", "TypeScript", "Next.js", "Express.js", "MongoDB", "PostgreSQL", "Docker", "HTML", "Vue.js", "SCSS", "SASS", "CSS", "Git", "Python", "PrismaDB", "Figma", "Socket IO", "GraphQL", "Google Ads", "Meta Ads", "Trendyol", "İkas", "Shopify"];
-const SOCIAL_LINKS = [
-  { icon: Github, link: "https://github.com/burakcankrpnr" },
-  { icon: Linkedin, link: "https://www.linkedin.com/in/burakcankorpinar/" },
-  { icon: Instagram, link: "https://www.instagram.com/burakcankorpinar/" }
-];
+        const track = root.current.querySelector(".hero-track");
+        gsap.to(track, {
+          x: () => -Math.max(0, track.scrollWidth - window.innerWidth) * 0.55,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero-strip",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        });
+      });
 
-const Home = () => {
-  const [text, setText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
-  const [wordIndex, setWordIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // AOS Initialization
-  useEffect(() => {
-    const initAOS = () => {
-      AOS.init({ once: true, offset: 10 });
-    };
-    initAOS();
-    window.addEventListener("resize", initAOS);
-    return () => window.removeEventListener("resize", initAOS);
-  }, []);
-
-  useEffect(() => {
-    setIsLoaded(true);
-    return () => setIsLoaded(false);
-  }, []);
-
-  // Typing Effect
-  const handleTyping = useCallback(() => {
-    if (isTyping) {
-      if (charIndex < WORDS[wordIndex].length) {
-        setText((prev) => prev + WORDS[wordIndex][charIndex]);
-        setCharIndex((prev) => prev + 1);
-      } else {
-        setTimeout(() => setIsTyping(false), PAUSE_DURATION);
-      }
-    } else {
-      if (charIndex > 0) {
-        setText((prev) => prev.slice(0, -1));
-        setCharIndex((prev) => prev - 1);
-      } else {
-        setWordIndex((prev) => (prev + 1) % WORDS.length);
-        setIsTyping(true);
-      }
-    }
-  }, [charIndex, isTyping, wordIndex]);
-
-  useEffect(() => {
-    const timeout = setTimeout(handleTyping, isTyping ? TYPING_SPEED : ERASING_SPEED);
-    return () => clearTimeout(timeout);
-  }, [handleTyping, isTyping]);
-
-  // Lottie Configuration (rendererSettings kaldırıldı)
-  const lottieOptions = {
-    src: "/Coding.json",
-    loop: true,
-    autoplay: true,
-    style: { width: "100%", height: "100%" },
-    className: `w-full h-full transition-all duration-500 ${
-      isHovering
-        ? "scale-[180%] sm:scale-[160%] md:scale-[150%] lg:scale-[145%] rotate-2"
-        : "scale-[175%] sm:scale-[155%] md:scale-[145%] lg:scale-[140%]"
-    }`
-  };
+      return () => mm.revert();
+    },
+    { scope: root }
+  );
 
   return (
-    <section className="min-h-screen bg-[#030014] overflow-hidden" id="Home" aria-labelledby="home-heading">
-      <div className={`relative z-10 transition-all duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}>
-        <div className="container mx-auto px-[5%] sm:px-6 lg:px-[0%] min-h-screen pt-20 sm:pt-0">
-          <div className="flex flex-col lg:flex-row items-center justify-center h-screen md:justify-between gap-0 sm:gap-12 lg:gap-20">
-            {/* Left Column */}
-            <div
-              className="w-full lg:w-1/2 space-y-6 sm:space-y-8 text-left lg:text-left order-1 lg:order-1 lg:mt-0"
-              data-aos="fade-right"
-              data-aos-delay="200"
+    <section
+      id="Home"
+      ref={root}
+      className="relative overflow-hidden pt-28 md:pt-40"
+      aria-labelledby="home-heading"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] bg-[radial-gradient(60%_60%_at_20%_0%,rgba(201,190,255,0.10),transparent_70%)]"
+      />
+
+      <div className="shell relative">
+        <p className="hero-fade flex items-center gap-3 text-[15px] text-sis">
+          <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+            <span className="status-ping absolute inset-0 rounded-full bg-kayisi" />
+            <span className="relative h-2.5 w-2.5 rounded-full bg-kayisi" />
+          </span>
+          <span>
+            Şu an{" "}
+            <a
+              href="https://stylingpark.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-kar link-underline"
             >
-              <div className="space-y-4 sm:space-y-6">
-                <StatusBadge />
-                <div id="home-heading">
-                  <MainTitle />
-                </div>
-                {/* Typing Effect */}
-                <div className="h-8 flex items-center" data-aos="fade-up" data-aos-delay="800">
-                  <span className="text-xl md:text-2xl bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent font-light">
-                    {text}
+              StylingPark
+            </a>
+            ’ta full-stack geliştiriciyim
+          </span>
+        </p>
+
+        <h1
+          id="home-heading"
+          aria-label="Burak Can Körpınar"
+          className="display mt-6 font-semibold text-kar leading-[0.86] text-[clamp(5rem,21vw,14.5rem)] tracking-[-0.045em]"
+          style={{ fontVariationSettings: '"wdth" 80' }}
+        >
+          {NAME_LINES.map((line) => (
+            <span key={line} className="mask-line" aria-hidden="true">
+              <span>
+                {Array.from(line).map((ch, i) => (
+                  <span key={i} className="hero-char inline-block">
+                    {ch === " " ? " " : ch}
                   </span>
-                  <span className="w-[3px] h-6 bg-gradient-to-t from-[#6366f1] to-[#a855f7] ml-1 animate-blink"></span>
-                </div>
-                {/* Description */}
-                <p
-                  className="text-base md:text-lg text-gray-400 max-w-xl leading-relaxed font-light"
-                  data-aos="fade-up"
-                  data-aos-delay="1000"
-                >
-                  Web Sitesi Yenilikçi, Eğlenceli ve Dijital Çözümlerle Kullanıcı Dostudur.
-                </p>
-                {/* Tech Stack */}
-                <div className="flex flex-wrap gap-3 justify-start" data-aos="fade-up" data-aos-delay="1200">
-                  {TECH_STACK.map((tech, index) => (
-                    <TechStack key={index} tech={tech} />
-                  ))}
-                </div>
-                {/* CTA Buttons */}
-                <div className="flex flex-row gap-3 w-full justify-start" data-aos="fade-up" data-aos-delay="1400">
-                  <CTAButton href="#Portofolio" text="Projeler" icon={ExternalLink} />
-                  <CTAButton href="#Contact" text="İletişim" icon={Mail} />
-                </div>
-                {/* Social Links */}
-                <div className="hidden sm:flex gap-4 justify-start" data-aos="fade-up" data-aos-delay="1600">
-                  {SOCIAL_LINKS.map((social, index) => (
-                    <SocialLink key={index} {...social} />
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Right Column - Lottie Animation */}
-            <div
-              className="w-full py-[10%] sm:py-0 lg:w-1/2 h-auto lg:h-[600px] xl:h-[750px] relative flex items-center justify-center order-2 lg:order-2 mt-8 lg:mt-0"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-              data-aos="fade-left"
-              data-aos-delay="600"
-            >
-              <div className="relative w-full opacity-90">
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r from-[#6366f1]/10 to-[#a855f7]/10 rounded-3xl blur-3xl transition-all duration-700 ease-in-out ${
-                    isHovering ? "opacity-50 scale-105" : "opacity-20 scale-100"
-                  }`}
-                ></div>
-                <div
-                  className={`relative z-10 w-full opacity-90 transform transition-transform duration-500 ${
-                    isHovering ? "scale-105" : "scale-100"
-                  }`}
-                >
-                  <DotLottieReact {...lottieOptions} />
-                </div>
-                <div
-                  className={`absolute inset-0 pointer-events-none transition-all duration-700 ${
-                    isHovering ? "opacity-50" : "opacity-20"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 blur-3xl animate-[pulse_6s_cubic-bezier(0.4,0,0.6,1)_infinite] transition-all duration-700 ${
-                      isHovering ? "scale-110" : "scale-100"
-                    }`}
-                  ></div>
-                </div>
-              </div>
-            </div>
+                ))}
+              </span>
+            </span>
+          ))}
+        </h1>
+
+        <div className="mt-10 grid gap-8 md:mt-14 md:grid-cols-12 md:items-end">
+          <p className="hero-fade max-w-[30ch] text-[1.35rem] leading-snug text-lila md:col-span-7 md:text-[1.75rem]">
+            Markalar için hızlı, satış yapan web siteleri ve mobil uygulamalar geliştiriyorum.
+          </p>
+          <div className="hero-fade flex flex-wrap gap-3 md:col-span-5 md:justify-end">
+            <a href="#Portofolio" onClick={jump("Portofolio")} className="btn-primary">
+              İşleri gör
+            </a>
+            <a href="#Contact" onClick={jump("Contact")} className="btn-ghost">
+              İletişime geç
+            </a>
           </div>
         </div>
+      </div>
+
+      <div className="hero-strip mt-16 pb-24 md:mt-24 md:pb-32">
+        <ul className="hero-track flex w-max gap-4 pl-4 sm:pl-8 md:gap-6 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
+          {STRIP.map((p) => (
+            <li key={p.id} className="hero-shot">
+              <a
+                href={p.Link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block w-[260px] sm:w-[320px] md:w-[400px]"
+              >
+                <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-cizgi bg-murekkep">
+                  <img
+                    src={previewFileFromUrl(p.Link) || p.Img}
+                    alt={`${p.Title} sitesinin ana sayfası`}
+                    loading="lazy"
+                    draggable={false}
+                    className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                  />
+                </div>
+                <div className="mt-3 flex items-baseline justify-between gap-4 text-sm">
+                  <span className="text-kar group-hover:text-kayisi transition-colors">{p.Title}</span>
+                  <span className="truncate text-sis">{hostOf(p.Link)}</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 };
+
+Home.propTypes = { ready: PropTypes.instanceOf(Promise) };
 
 export default memo(Home);

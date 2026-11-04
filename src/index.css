@@ -2,208 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-	scroll-behavior: smooth;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(99, 102, 241, 0.3) rgba(12, 5, 53, 0.356);
+@layer base {
+	:root {
+		--gece: #0d0b1f;
+		--murekkep: #17142f;
+		--cizgi: #2a2650;
+		--lila: #c9beff;
+		--kar: #f3f0ff;
+		--sis: #9c97c4;
+		--kayisi: #ffb27a;
+		color-scheme: dark;
+	}
+
+	html {
+		-webkit-text-size-adjust: 100%;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	html,
+	body {
+		overflow-x: clip;
+		background: var(--gece);
+		color: var(--kar);
+		font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+	}
+
+	::selection {
+		background: var(--kayisi);
+		color: var(--gece);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--kayisi);
+		outline-offset: 3px;
+		border-radius: 6px;
+	}
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--cizgi) transparent;
+	}
 }
 
-html,
-body {
-	overflow-x: hidden;
-	background: #030014;
-	scroll-behavior: smooth !important;
-	font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+@layer components {
+	.shell {
+		@apply mx-auto w-full max-w-[80rem] px-4 sm:px-8 lg:px-12;
+	}
+
+	.display {
+		font-family: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+		font-optical-sizing: auto;
+		letter-spacing: -0.03em;
+	}
+
+	.btn {
+		@apply inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-semibold transition-colors duration-200;
+	}
+
+	.btn-primary {
+		@apply btn bg-kayisi text-gece hover:bg-kar;
+	}
+
+	.btn-ghost {
+		@apply btn border border-cizgi text-kar hover:border-lila hover:bg-murekkep;
+	}
+
+	.field {
+		@apply w-full rounded-2xl border border-cizgi bg-gece px-4 py-3.5 text-[15px] text-kar placeholder:text-sis/60 transition-colors duration-200 hover:border-sis/50 focus:border-kayisi focus:outline-none disabled:opacity-50;
+	}
+
+	.link-underline {
+		@apply underline decoration-cizgi decoration-1 underline-offset-[5px] transition-colors duration-200 hover:text-kayisi hover:decoration-kayisi;
+	}
 }
 
-@keyframes blob {
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+	height: auto;
+}
+.lenis.lenis-smooth {
+	scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+	overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+	overflow: clip;
+}
+
+/* Hero isim maskesi */
+.mask-line {
+	display: block;
+	overflow: hidden;
+	padding-bottom: 0.06em;
+	margin-bottom: -0.06em;
+}
+.mask-line > span {
+	display: inline-block;
+	will-change: transform;
+}
+
+@keyframes status-ping {
+	0% {
+		transform: scale(1);
+		opacity: 0.6;
+	}
+	80%,
+	100% {
+		transform: scale(2.4);
+		opacity: 0;
+	}
+}
+.status-ping {
+	animation: status-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes preview-mouse-wheel {
 	0%,
 	100% {
+		opacity: 1;
 		transform: translateY(0);
 	}
 	50% {
-		transform: translateY(-20px);
+		opacity: 0.25;
+		transform: translateY(5px);
 	}
 }
-
-.animate-blob {
-	animation: blob 8s infinite;
-}
-
-.animation-delay-2000 {
-	animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-	animation-delay: 4s;
-}
-
-/* Enhanced Custom Scrollbar Styles */
-::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-	background-color: transparent;
-  }
-  
-  ::-webkit-scrollbar-track {
-	background: rgba(3, 0, 20, 0.4);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-	border: 1px solid rgba(99, 102, 241, 0.1);
-  }
-  
-  ::-webkit-scrollbar-thumb {
-	background: rgba(99, 102, 241, 0.3);
-	backdrop-filter: blur(4px);
-	-webkit-backdrop-filter: blur(4px);
-	border-radius: 20px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 
-	  inset 0 0 20px rgba(168, 85, 247, 0.2),
-	  0 0 10px rgba(99, 102, 241, 0.2);
-	transition: all 0.3s ease;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-	background: rgba(99, 102, 241, 0.5);
-	border: 1px solid rgba(168, 85, 247, 0.3);
-	box-shadow: 
-	  inset 0 0 30px rgba(168, 85, 247, 0.3),
-	  0 0 15px rgba(99, 102, 241, 0.3);
-  }
-  
-  /* When scrollbar is in active/clicked state */
-  ::-webkit-scrollbar-thumb:active {
-	background: rgba(99, 102, 241, 0.6);
-	border: 1px solid rgba(168, 85, 247, 0.4);
-	box-shadow: 
-	  inset 0 0 40px rgba(168, 85, 247, 0.4),
-	  0 0 20px rgba(99, 102, 241, 0.4);
-  }
-  
-  ::-webkit-scrollbar-corner {
-	background: transparent;
-  }
-
-  [data-aos] {
-	will-change: transform, opacity !important;
-  }
-
-
-
- @keyframes shine {
-  from {
-	     left: -100%;
-  }
-	  to {
-	    left: 200%;
-	   }
-	 }
-	 .animate-shine {
-   animation: shine 1.5s ease-in-out infinite;
- }
-
-@keyframes preview-mouse-wheel {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 0.25;
-    transform: translateY(5px);
-  }
-}
-
 .preview-mouse-wheel {
-  animation: preview-mouse-wheel 1.2s ease-in-out infinite;
+	animation: preview-mouse-wheel 1.2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .preview-mouse-wheel {
-    animation: none;
-  }
-}
-
-  
-/*   @media (prefers-color-scheme: dark) {
-	::-webkit-scrollbar-track {
-	  background: rgba(3, 0, 20, 0.6);
+	.preview-mouse-wheel,
+	.status-ping {
+		animation: none;
 	}
-  } */
-
-
-/* 
-  .container {
-	width: 100%;
-	height: 100%;
-  }
-  
-  .main > div {
-	position: absolute;
-	will-change: transform;
-	border-radius: 50%;
-	background: lightcoral;
-	box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.75);
-	opacity: 0.6;
-  }
-  
-  .main > div:nth-child(1) {
-	width: 60px;
-	height: 60px;
-  }
-  
-  .main > div:nth-child(2) {
-	width: 125px;
-	height: 125px;
-  }
-  
-  .main > div:nth-child(3) {
-	width: 75px;
-	height: 75px;
-  }
-  
-  .main > div::after {
-	content: '';
-	position: absolute;
-	top: 20px;
-	left: 20px;
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	background: rgba(255, 0, 0, 0.8);
-  }
-  
-  .main > div:nth-child(2)::after {
-	top: 35px;
-	left: 35px;
-	width: 35px;
-	height: 35px;
-  }
-  
-  .main > div:nth-child(3)::after {
-	top: 25px;
-	left: 25px;
-	width: 25px;
-	height: 25px;
-  }
-  
-  .main {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	filter: url('#blob');
-	overflow: hidden;
-	background: transparent;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	cursor: default;
-  } */
+}
