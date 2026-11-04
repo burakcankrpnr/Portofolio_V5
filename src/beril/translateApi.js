@@ -1,5 +1,5 @@
 const API_BASE = "/api";
-const CLIENT_BATCH_SIZE = 6;
+const CLIENT_BATCH_SIZE = 1;
 
 async function readJson(res) {
   const text = await res.text();

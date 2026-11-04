@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 
-export const MAX_PAGES_PER_REQUEST = 8;
+/** Sayfa sayfa çeviri — JSON bozulması / kesilme riski en düşük. */
+export const MAX_PAGES_PER_REQUEST = 1;
 
 export const SYSTEM_PROMPT = `Sen bir akademik çevirmensin. Görevin ders notu metinlerini İngilizceden Türkçeye çevirmek.
 
@@ -9,7 +10,9 @@ Kurallar:
 - Zaten Türkçe olan cümleleri, terimleri ve açıklamaları olduğu gibi bırak.
 - Anlamı uydurma, özetleme veya genişletme; içeriği koru.
 - Madde işaretleri, numaralar, tarih ve hafta etiketleri gibi yapıyı koru.
-- Yanıtını yalnızca geçerli JSON olarak ver: {"pages":["..."]} — pages dizisi girişteki sayfa sayısıyla aynı uzunlukta olmalı.`;
+- Çıktı SADECE geçerli JSON olsun, markdown yok: {"pages":["sayfa1","sayfa2"]}
+- pages dizisi girişteki sayfa sayısıyla BİREBİR aynı uzunlukta olmalı.
+- Her sayfa metnindeki tırnak ve satır sonlarını JSON string kaçış kurallarına uygun yaz.`;
 
 /** Jenkins’e .env satırı / model yapışınca bozulan key’i ayıklar. */
 export function normalizeApiKey(raw) {
@@ -17,14 +20,10 @@ export function normalizeApiKey(raw) {
     .trim()
     .replace(/^["']|["']$/g, "");
 
-  // "OPENAI_API_KEY=sk-..." diye tüm satır yapıştırılmışsa
   key = key.replace(/^OPENAI_API_KEY\s*=\s*/i, "");
-
-  // "sk-...OPENAI_MODEL=gpt-4o-mini" (satır sonu kaybolmuş .env kopyası)
   key = key.replace(/OPENAI_MODEL\s*=.*$/i, "");
   key = key.replace(/BERIL_PORT\s*=.*$/i, "");
 
-  // Username/Password credential → "sk-...:gpt-4o-mini"
   if (key.includes(":gpt-") || /:gpt-4/.test(key)) {
     key = key.split(":")[0];
   }
@@ -66,7 +65,88 @@ function getClient() {
   return new OpenAI({ apiKey: key });
 }
 
-/** Tek istekte en fazla MAX_PAGES_PER_REQUEST sayfa çevirir (Vercel timeout için). */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Model bazen markdown veya kırık JSON döner; mümkün olduğunca kurtar. */
+export function parsePagesJson(raw, expectedCount) {
+  let text = String(raw || "").trim();
+  if (!text) throw new Error("boş yanıt");
+
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) text = fence[1].trim();
+
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end > start) {
+    text = text.slice(start, end + 1);
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // Kırık string kaçışlarını yumuşatmayı dene
+    const repaired = text
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]");
+    parsed = JSON.parse(repaired);
+  }
+
+  let pages = parsed?.pages;
+  if (!Array.isArray(pages) && typeof parsed === "object" && parsed !== null) {
+    const values = Object.keys(parsed)
+      .filter((k) => /^\d+$/.test(k))
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => parsed[k]);
+    if (values.length) pages = values;
+  }
+
+  if (!Array.isArray(pages)) {
+    throw new Error("pages dizisi yok");
+  }
+
+  pages = pages.map((p) => (typeof p === "string" ? p : String(p ?? "")));
+
+  if (expectedCount != null && pages.length !== expectedCount) {
+    throw new Error(`sayfa sayısı ${pages.length}/${expectedCount}`);
+  }
+
+  return pages;
+}
+
+async function callTranslateOnce(client, model, pages, title) {
+  const completion = await client.chat.completions.create({
+    model,
+    temperature: 0.1,
+    max_tokens: 16000,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: JSON.stringify({
+          title: title || "",
+          pageCount: pages.length,
+          pages,
+        }),
+      },
+    ],
+  });
+
+  const choice = completion.choices?.[0];
+  const raw = choice?.message?.content || "";
+  if (choice?.finish_reason === "length") {
+    throw new Error("yanıt kesildi (token)");
+  }
+  return parsePagesJson(raw, pages.length);
+}
+
+/**
+ * Batch çeviri: bozuk JSON’da retry, gerekirse yarıya böl, tek sayfada orijinali koru.
+ * Tüm işi düşürmez.
+ */
 export async function translateBatch(pages, title = "") {
   if (!Array.isArray(pages) || pages.length === 0) {
     const err = new Error("pages dizisi gerekli");
@@ -81,36 +161,27 @@ export async function translateBatch(pages, title = "") {
 
   const model = getModel();
   const client = getClient();
-  const completion = await client.chat.completions.create({
-    model,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: JSON.stringify({ title, pages }),
-      },
-    ],
-  });
 
-  const raw = completion.choices?.[0]?.message?.content || "{}";
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw new Error("OpenAI geçersiz JSON döndürdü");
+  let lastError = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const out = await callTranslateOnce(client, model, pages, title);
+      return { pages: out, model };
+    } catch (error) {
+      lastError = error;
+      await sleep(400 * attempt);
+    }
   }
 
-  const out = Array.isArray(parsed.pages) ? parsed.pages : null;
-  if (!out || out.length !== pages.length) {
-    throw new Error(
-      `Çeviri sayfa sayısı uyuşmuyor (beklenen ${pages.length}, gelen ${out?.length ?? 0})`
-    );
+  // Batch büyükse ikiye böl
+  if (pages.length > 1) {
+    const mid = Math.ceil(pages.length / 2);
+    const left = await translateBatch(pages.slice(0, mid), title);
+    const right = await translateBatch(pages.slice(mid), title);
+    return { pages: [...left.pages, ...right.pages], model };
   }
 
-  return {
-    pages: out.map((page) => (typeof page === "string" ? page : String(page ?? ""))),
-    model,
-  };
+  // Tek sayfa hâlâ bozuluyorsa orijinali bırak — iş devam etsin
+  console.warn("[beril] sayfa çevirisi atlandı:", lastError?.message || lastError);
+  return { pages: [pages[0]], model };
 }
