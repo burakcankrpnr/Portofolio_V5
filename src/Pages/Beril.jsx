@@ -3,6 +3,13 @@ import { Link } from "react-router-dom";
 import { extractPdfText } from "../beril/extractPdfText";
 import { checkBerilHealth, translatePages } from "../beril/translateApi";
 import { buildTranslatedPdfBlob, downloadBlob } from "../beril/buildTranslatedPdf";
+import {
+  clearHistory,
+  formatHistoryDate,
+  listHistory,
+  removeHistoryItem,
+  saveHistoryItem,
+} from "../beril/historyStore";
 
 const STATUS = {
   queued: "Bekliyor",
@@ -29,13 +36,30 @@ const BerilPage = () => {
   const inputRef = useRef(null);
   const jobsRef = useRef([]);
   const [jobs, setJobs] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [health, setHealth] = useState({ loading: true, ok: false, model: "", error: "" });
 
+  const refreshHistory = useCallback(async () => {
+    try {
+      const items = await listHistory();
+      setHistory(items);
+    } catch {
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     jobsRef.current = jobs;
   }, [jobs]);
+
+  useEffect(() => {
+    refreshHistory();
+  }, [refreshHistory]);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +130,15 @@ const BerilPage = () => {
           pages: translated.pages,
         });
 
+        await saveHistoryItem({
+          id: job.id,
+          name: job.name,
+          pageCount: extracted.pageCount,
+          blob,
+          createdAt: Date.now(),
+        });
+        await refreshHistory();
+
         updateJob(job.id, { status: "ready", blob });
       } catch (error) {
         updateJob(job.id, {
@@ -116,13 +149,28 @@ const BerilPage = () => {
     }
 
     setBusy(false);
-  }, [busy, updateJob]);
+  }, [busy, refreshHistory, updateJob]);
 
   const onDrop = (event) => {
     event.preventDefault();
     setDragOver(false);
     addFiles(event.dataTransfer.files);
   };
+
+  const removeJob = async (job) => {
+    setJobs((prev) => prev.filter((j) => j.id !== job.id));
+    if (job.status === "ready") {
+      try {
+        await removeHistoryItem(job.id);
+        await refreshHistory();
+      } catch {
+        /* ignore */
+      }
+    }
+  };
+
+  const activeIds = new Set(jobs.map((j) => j.id));
+  const pastOnly = history.filter((item) => !activeIds.has(item.id));
 
   return (
     <div className="min-h-screen bg-gece text-kar">
@@ -146,7 +194,7 @@ const BerilPage = () => {
       <main className="shell py-10 md:py-14">
         <p className="max-w-2xl text-[17px] leading-relaxed text-sis">
           İngilizce ders notu PDF’lerini Türkçeye çevirir. Tek veya toplu yükleyin; biten dosyaları
-          PDF olarak indirin.
+          PDF olarak indirin. Eski çeviriler bu tarayıcıda saklanır.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
@@ -218,45 +266,113 @@ const BerilPage = () => {
         </div>
 
         {jobs.length > 0 && (
-          <ul className="mt-10 space-y-3">
-            {jobs.map((job) => (
-              <li
-                key={job.id}
-                className="flex flex-col gap-3 rounded-xl border border-cizgi bg-murekkep px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+          <section className="mt-10">
+            <h2 className="mb-3 text-sm text-sis">Kuyruk</h2>
+            <ul className="space-y-3">
+              {jobs.map((job) => (
+                <li
+                  key={job.id}
+                  className="flex flex-col gap-3 rounded-xl border border-cizgi bg-murekkep px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-kar">{job.name}</p>
+                    <p className="mt-1 text-sm text-sis">
+                      {STATUS[job.status]}
+                      {job.status === "translating" && job.progress ? ` ${job.progress}` : ""}
+                      {job.pageCount != null ? ` · ${job.pageCount} sayfa` : ""}
+                      {job.error ? ` · ${job.error}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    {job.status === "ready" && job.blob && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          downloadBlob(job.blob, job.name.replace(/\.pdf$/i, "") + "-TR.pdf")
+                        }
+                        className="rounded-lg bg-kayisi px-4 py-2 text-sm font-medium text-gece"
+                      >
+                        İndir
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeJob(job)}
+                      className="rounded-lg border border-cizgi px-4 py-2 text-sm text-sis hover:text-kar"
+                    >
+                      Kaldır
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className="mt-12">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm text-sis">Önceki çeviriler</h2>
+            {pastOnly.length > 0 && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await clearHistory();
+                  setJobs((prev) => prev.filter((j) => j.status !== "ready"));
+                  await refreshHistory();
+                }}
+                className="text-sm text-sis underline-offset-2 hover:text-kar hover:underline"
               >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-kar">{job.name}</p>
-                  <p className="mt-1 text-sm text-sis">
-                    {STATUS[job.status]}
-                    {job.status === "translating" && job.progress ? ` ${job.progress}` : ""}
-                    {job.pageCount != null ? ` · ${job.pageCount} sayfa` : ""}
-                    {job.error ? ` · ${job.error}` : ""}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  {job.status === "ready" && job.blob && (
+                Tümünü sil
+              </button>
+            )}
+          </div>
+
+          {historyLoading ? (
+            <p className="text-sm text-sis">Yükleniyor…</p>
+          ) : pastOnly.length === 0 ? (
+            <p className="rounded-xl border border-cizgi bg-murekkep/40 px-4 py-6 text-sm text-sis">
+              Henüz kayıtlı çeviri yok. Biten PDF’ler burada listelenir ve tekrar indirilebilir.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {pastOnly.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-col gap-3 rounded-xl border border-cizgi bg-murekkep px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-kar">{item.name}</p>
+                    <p className="mt-1 text-sm text-sis">
+                      {formatHistoryDate(item.createdAt)}
+                      {item.pageCount != null ? ` · ${item.pageCount} sayfa` : ""}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
                     <button
                       type="button"
                       onClick={() =>
-                        downloadBlob(job.blob, job.name.replace(/\.pdf$/i, "") + "-TR.pdf")
+                        downloadBlob(item.blob, item.name.replace(/\.pdf$/i, "") + "-TR.pdf")
                       }
                       className="rounded-lg bg-kayisi px-4 py-2 text-sm font-medium text-gece"
                     >
                       İndir
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setJobs((prev) => prev.filter((j) => j.id !== job.id))}
-                    className="rounded-lg border border-cizgi px-4 py-2 text-sm text-sis hover:text-kar"
-                  >
-                    Kaldır
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await removeHistoryItem(item.id);
+                        await refreshHistory();
+                      }}
+                      className="rounded-lg border border-cizgi px-4 py-2 text-sm text-sis hover:text-kar"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
     </div>
   );
