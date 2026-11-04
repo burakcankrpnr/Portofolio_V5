@@ -11,14 +11,17 @@ import Footer from "./components/Footer";
 import Intro from "./components/Intro";
 import {
   createIntroGate,
-  prefersReducedMotion,
   scrollToId,
   useSmoothScroll,
 } from "./lib/motion";
 import NotFound from "./Pages/NotFound";
+import BerilPage from "./Pages/Beril";
 import TeklifOsRoute from "./teklifos/TeklifOsRoute";
 
 const SITE_ORIGIN = "https://burakcankorpinar.dev";
+
+/** Tam sayfa yüklemesinde bir kez; rota değişiminde LandingPage yeniden mount olsa bile tekrarlanmaz. */
+let introPlayed = false;
 
 const SECTION_BY_PATH = {
   "/": "Home",
@@ -68,7 +71,7 @@ const setMetaTag = (selector, attr, value) => {
   el.setAttribute(attr, value);
 };
 
-const useSectionSeo = () => {
+const useSectionSeo = (introWait) => {
   const { pathname } = useLocation();
   const sectionId = SECTION_BY_PATH[pathname] || "Home";
   const seo = SEO_BY_PATH[pathname] || SEO_BY_PATH["/"];
@@ -96,22 +99,32 @@ const useSectionSeo = () => {
   useEffect(() => {
     if (pathname === "/") return undefined;
 
-    const timer = setTimeout(() => scrollToId(sectionId), 120);
+    let cancelled = false;
+    let timer;
 
-    return () => clearTimeout(timer);
-  }, [pathname, sectionId]);
+    Promise.resolve(introWait).then(() => {
+      if (cancelled) return;
+      timer = setTimeout(() => scrollToId(sectionId), 120);
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [pathname, sectionId, introWait]);
 
   return sectionId;
 };
 
 const LandingPage = () => {
-  const { pathname } = useLocation();
-  const [gate] = useState(() =>
-    createIntroGate(pathname === "/" && !prefersReducedMotion())
-  );
+  const [gate] = useState(() => {
+    const active = !introPlayed;
+    if (active) introPlayed = true;
+    return createIntroGate(active);
+  });
   const [showIntro, setShowIntro] = useState(gate.active);
 
-  useSectionSeo();
+  useSectionSeo(gate.wait);
   useSmoothScroll();
 
   return (
@@ -150,6 +163,7 @@ function App() {
         <Route path="/portfolio" element={<LandingPage />} />
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/project/:id" element={<ProjectPageLayout />} />
+        <Route path="/beril" element={<BerilPage />} />
         <Route path="/buse/*" element={<TeklifOsRoute />} />
         <Route path="/teklifos/*" element={<LegacyTeklifRedirect />} />
         <Route path="*" element={<NotFound />} />

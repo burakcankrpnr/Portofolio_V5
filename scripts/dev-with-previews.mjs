@@ -25,6 +25,9 @@ const start = (command, args, label) => {
 
 const vite = start("npx", ["vite", ...process.argv.slice(2)], "vite");
 
+// OpenAI PDF çeviri API (Vite /api → :3001)
+start("node", ["server/beril.mjs"], "beril");
+
 // Only missing previews — existing files are skipped
 start("node", ["scripts/capture-previews.mjs"], "previews");
 

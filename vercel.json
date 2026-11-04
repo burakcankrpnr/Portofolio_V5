@@ -1,5 +1,14 @@
 {
   "version": 2,
+  "functions": {
+    "api/beril/translate.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/beril/health.js": {
+      "maxDuration": 10
+    }
+  },
   "redirects": [
     {
       "source": "/:path*",
