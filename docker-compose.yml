@@ -6,11 +6,13 @@ services:
       dockerfile: Dockerfile.beril
     container_name: beril-api
     restart: always
-    env_file:
-      - .env
     environment:
       BERIL_HOST: "0.0.0.0"
       BERIL_PORT: "3001"
+      # Local: proje kökündeki .env otomatik interpolate edilir.
+      # Jenkins: job'a OPENAI_API_KEY / OPENAI_MODEL secret olarak ekle.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
     expose:
       - "3001"
     security_opt:
