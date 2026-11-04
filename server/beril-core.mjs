@@ -11,18 +11,49 @@ Kurallar:
 - Madde işaretleri, numaralar, tarih ve hafta etiketleri gibi yapıyı koru.
 - Yanıtını yalnızca geçerli JSON olarak ver: {"pages":["..."]} — pages dizisi girişteki sayfa sayısıyla aynı uzunlukta olmalı.`;
 
+/** Jenkins Username/Password veya yapışık MODEL değerini ayıklar. */
+export function normalizeApiKey(raw) {
+  let key = String(raw || "")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+
+  // credentials('id') Username/Password → "sk-...:gpt-4o-mini"
+  if (key.includes(":gpt-") || /:gpt-4/.test(key)) {
+    key = key.split(":")[0].trim();
+  }
+
+  // Secret text'e yanlışlıkla model de yapıştırılmış
+  key = key.replace(/\s*gpt-4o-mini\s*$/i, "").trim();
+  key = key.split(/\r?\n/)[0].trim();
+
+  return key;
+}
+
 export function getModel() {
-  return process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const model = String(process.env.OPENAI_MODEL || "gpt-4o-mini")
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .split(/\r?\n/)[0]
+    .trim();
+  return model || "gpt-4o-mini";
 }
 
 export function hasApiKey() {
-  return Boolean(process.env.OPENAI_API_KEY);
+  const key = normalizeApiKey(process.env.OPENAI_API_KEY);
+  return Boolean(key) && key.startsWith("sk-");
 }
 
 function getClient() {
-  const key = process.env.OPENAI_API_KEY;
+  const key = normalizeApiKey(process.env.OPENAI_API_KEY);
   if (!key) {
     const err = new Error("OPENAI_API_KEY tanımlı değil");
+    err.status = 500;
+    throw err;
+  }
+  if (!key.startsWith("sk-")) {
+    const err = new Error(
+      "OPENAI_API_KEY geçersiz. Jenkins’te Secret text olarak yalnız sk-… key’ini koy (model ayrı)."
+    );
     err.status = 500;
     throw err;
   }
