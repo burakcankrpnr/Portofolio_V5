@@ -57,7 +57,7 @@ const ContactPage = () => {
   };
 
   return (
-    <section id="Contact" className="border-t border-cizgi py-24 md:py-32" aria-labelledby="contact-heading">
+    <section id="Contact" className="border-t border-cizgi py-20 sm:py-24 md:py-32" aria-labelledby="contact-heading">
       <div className="shell">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">

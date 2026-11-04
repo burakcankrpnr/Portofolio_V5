@@ -40,7 +40,7 @@ export default function Portofolio() {
   return (
     <section
       id="Portofolio"
-      className="border-t border-cizgi py-24 md:py-32"
+      className="border-t border-cizgi py-20 sm:py-24 md:py-32"
       aria-labelledby="portfolio-heading"
     >
       <div className="shell">

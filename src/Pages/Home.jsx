@@ -34,7 +34,11 @@ const Home = ({ ready = Promise.resolve() }) => {
             { autoAlpha: 0, y: 48, duration: 1, stagger: 0.06, ease: "power3.out" },
             "-=0.7"
           );
+      });
 
+      // Fare ile gezilen geniş ekranlarda şerit scroll ile kayar;
+      // dokunmatik ekranlarda parmakla kaydırılır (CSS overflow-x).
+      mm.add("(prefers-reduced-motion: no-preference) and (min-width: 768px) and (pointer: fine)", () => {
         const track = root.current.querySelector(".hero-track");
         gsap.to(track, {
           x: () => -Math.max(0, track.scrollWidth - window.innerWidth) * 0.55,
@@ -120,15 +124,15 @@ const Home = ({ ready = Promise.resolve() }) => {
         </div>
       </div>
 
-      <div className="hero-strip mt-16 pb-24 md:mt-24 md:pb-32">
-        <ul className="hero-track flex w-max gap-4 pl-4 sm:pl-8 md:gap-6 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
+      <div className="hero-strip mt-12 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-pl-4 pb-20 [scrollbar-width:none] sm:scroll-pl-8 md:mt-24 md:pb-32 [&::-webkit-scrollbar]:hidden [@media(min-width:768px)_and_(pointer:fine)]:overflow-visible">
+        <ul className="hero-track flex w-max gap-3 px-4 sm:gap-4 sm:px-8 md:gap-6 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
           {STRIP.map((p) => (
-            <li key={p.id} className="hero-shot">
+            <li key={p.id} className="hero-shot snap-start">
               <a
                 href={p.Link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block w-[260px] sm:w-[320px] md:w-[400px]"
+                className="group block w-[78vw] max-w-[320px] sm:w-[320px] md:w-[400px] md:max-w-none"
               >
                 <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-cizgi bg-murekkep">
                   <img

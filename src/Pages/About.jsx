@@ -57,13 +57,13 @@ const AboutPage = () => {
     <section
       id="About"
       ref={root}
-      className="border-t border-cizgi py-24 md:py-32"
+      className="border-t border-cizgi py-20 sm:py-24 md:py-32"
       aria-labelledby="about-heading"
     >
       <div className="shell">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="about-photo lg:col-span-5">
-            <div className="aspect-[4/5] overflow-hidden rounded-[28px] border border-cizgi bg-murekkep">
+          <div className="about-photo mx-auto w-full max-w-[420px] lg:col-span-5 lg:max-w-none">
+            <div className="aspect-square overflow-hidden rounded-[24px] sm:aspect-[4/5] sm:rounded-[28px] border border-cizgi bg-murekkep">
               <img
                 src="/image.jpg"
                 alt="Burak Can Körpınar"
@@ -118,9 +118,9 @@ const AboutPage = () => {
           </div>
         </div>
 
-        <dl className="mt-20 grid grid-cols-3 gap-4 border-t border-cizgi pt-10 md:mt-28">
+        <dl className="mt-16 grid grid-cols-3 gap-3 border-t border-cizgi pt-8 sm:gap-4 md:mt-28 md:pt-10">
           {STATS.map((s) => (
-            <div key={s.label} className="flex flex-col-reverse">
+            <div key={s.label} className="flex flex-col-reverse justify-end">
               <dt className="mt-2 text-sm text-sis md:text-base">{s.label}</dt>
               <dd
                 className="stat-value display text-6xl font-semibold leading-none text-kar sm:text-7xl md:text-[8rem]"
