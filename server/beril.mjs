@@ -68,6 +68,8 @@ const server = http.createServer(async (req, res) => {
   json(res, 404, { error: "Not found" });
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`[beril] http://127.0.0.1:${PORT} model=${getModel()}`);
+const HOST = process.env.BERIL_HOST || "0.0.0.0";
+
+server.listen(PORT, HOST, () => {
+  console.log(`[beril] http://${HOST}:${PORT} model=${getModel()} key=${hasApiKey() ? "ok" : "missing"}`);
 });

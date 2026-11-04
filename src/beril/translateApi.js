@@ -1,12 +1,29 @@
 const API_BASE = "/api";
 const CLIENT_BATCH_SIZE = 6;
 
+async function readJson(res) {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (!trimmed) return {};
+  if (trimmed.startsWith("<") || trimmed.startsWith("<!DOCTYPE")) {
+    throw new Error(
+      "Çeviri API’si HTML döndü. Local’de `npm run beril-server` veya `npm run dev` yeniden başlat; canlıda Vercel’e OPENAI_API_KEY ekleyip deploy et."
+    );
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    throw new Error(`Çeviri API yanıtı okunamadı (${res.status})`);
+  }
+}
+
 export async function checkBerilHealth() {
   const res = await fetch(`${API_BASE}/beril/health`);
+  const data = await readJson(res);
   if (!res.ok) {
-    throw new Error("Çeviri API’sine ulaşılamıyor");
+    throw new Error(data.error || "Çeviri API’sine ulaşılamıyor");
   }
-  return res.json();
+  return data;
 }
 
 async function translateBatchRequest(payload) {
@@ -16,7 +33,7 @@ async function translateBatchRequest(payload) {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json().catch(() => ({}));
+  const data = await readJson(res);
   if (!res.ok) {
     throw new Error(data.error || `Çeviri hatası (${res.status})`);
   }

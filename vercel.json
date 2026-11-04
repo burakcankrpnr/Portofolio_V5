@@ -37,6 +37,14 @@
   ],
   "routes": [
     {
+      "src": "/api/beril/health",
+      "dest": "/api/beril/health.js"
+    },
+    {
+      "src": "/api/beril/translate",
+      "dest": "/api/beril/translate.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },

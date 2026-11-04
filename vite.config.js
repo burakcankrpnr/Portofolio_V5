@@ -14,9 +14,21 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        configure: (proxy) => {
+          proxy.on('error', (err, _req, res) => {
+            console.error('[vite proxy /api]', err.message)
+            if (res && !res.headersSent) {
+              res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' })
+              res.end(JSON.stringify({
+                error: 'Beril API kapalı. Ayrı terminalde: npm run beril-server',
+                ok: false,
+              }))
+            }
+          })
+        },
       }
     }
   },

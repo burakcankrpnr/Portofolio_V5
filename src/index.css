@@ -141,3 +141,129 @@ html.lenis body {
 		animation: none;
 	}
 }
+
+/* Beril — kenarlardan uçuşan kalpler (sürekli hareket) */
+@keyframes beril-heart-from-left {
+	0% {
+		opacity: 0;
+		transform: translate3d(-10vw, 40px, 0) scale(0.4) rotate(-28deg);
+	}
+	8% {
+		opacity: 1;
+	}
+	25% {
+		transform: translate3d(18vw, -28px, 0) scale(1.15) rotate(12deg);
+	}
+	50% {
+		opacity: 0.95;
+		transform: translate3d(40vw, 22px, 0) scale(0.95) rotate(-8deg);
+	}
+	75% {
+		transform: translate3d(62vw, -16px, 0) scale(1.2) rotate(16deg);
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(92vw, 36px, 0) scale(0.5) rotate(32deg);
+	}
+}
+
+@keyframes beril-heart-from-right {
+	0% {
+		opacity: 0;
+		transform: translate3d(10vw, -36px, 0) scale(0.4) rotate(28deg);
+	}
+	8% {
+		opacity: 1;
+	}
+	25% {
+		transform: translate3d(-18vw, 24px, 0) scale(1.15) rotate(-14deg);
+	}
+	50% {
+		opacity: 0.95;
+		transform: translate3d(-40vw, -20px, 0) scale(0.95) rotate(10deg);
+	}
+	75% {
+		transform: translate3d(-62vw, 18px, 0) scale(1.2) rotate(-18deg);
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(-92vw, -30px, 0) scale(0.5) rotate(-30deg);
+	}
+}
+
+@keyframes beril-heart-bob {
+	0%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-10px) scale(1.18);
+	}
+}
+
+.beril-heart {
+	display: block;
+	will-change: transform, opacity;
+	animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+	animation-iteration-count: infinite;
+}
+
+.beril-heart--left {
+	animation-name: beril-heart-from-left;
+}
+
+.beril-heart--right {
+	animation-name: beril-heart-from-right;
+}
+
+.beril-heart-bob {
+	animation-name: beril-heart-bob;
+	animation-timing-function: ease-in-out;
+	animation-iteration-count: infinite;
+	transform-origin: center;
+}
+
+/* Mobil: kalpler kenarda kalır, metni örtmez */
+@media (max-width: 639px) {
+	@keyframes beril-heart-from-left {
+		0% {
+			opacity: 0;
+			transform: translate3d(-8vw, 20px, 0) scale(0.5) rotate(-20deg);
+		}
+		15% {
+			opacity: 0.75;
+		}
+		50% {
+			opacity: 0.55;
+			transform: translate3d(10vw, -12px, 0) scale(1) rotate(10deg);
+		}
+		100% {
+			opacity: 0;
+			transform: translate3d(4vw, 24px, 0) scale(0.6) rotate(18deg);
+		}
+	}
+
+	@keyframes beril-heart-from-right {
+		0% {
+			opacity: 0;
+			transform: translate3d(8vw, -18px, 0) scale(0.5) rotate(20deg);
+		}
+		15% {
+			opacity: 0.75;
+		}
+		50% {
+			opacity: 0.55;
+			transform: translate3d(-10vw, 14px, 0) scale(1) rotate(-10deg);
+		}
+		100% {
+			opacity: 0;
+			transform: translate3d(-4vw, -22px, 0) scale(0.6) rotate(-16deg);
+		}
+	}
+
+	.beril-heart {
+		opacity: 0.85;
+		max-width: 18px;
+		max-height: 18px;
+	}
+}

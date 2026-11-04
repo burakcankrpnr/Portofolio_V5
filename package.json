@@ -7,6 +7,7 @@
     "dev": "node scripts/dev-with-previews.mjs",
     "dev:only": "vite",
     "beril-server": "node server/beril.mjs",
+    "beril:vercel-env": "node scripts/set-vercel-beril-env.mjs",
     "server": "node server/beril.mjs",
     "dev:full": "npm run dev",
     "build": "node scripts/build-with-previews.mjs",

@@ -1,3 +1,5 @@
+const BERIL_URL = "https://burakcankorpinar.dev/beril";
+
 /**
  * Çevrilmiş sayfa metinlerinden indirilebilir PDF blob üretir.
  * @param {{ title: string, pages: string[] }} doc
@@ -44,6 +46,29 @@ export async function buildTranslatedPdfBlob(doc) {
     pageSize: "A4",
     pageMargins: [48, 56, 48, 56],
     content,
+    footer: (currentPage, pageCount) => ({
+      margin: [48, 0, 48, 24],
+      columns: [
+        {
+          text: [
+            { text: "PDF’e tıkla: ", color: "#888888", fontSize: 8 },
+            {
+              text: BERIL_URL,
+              link: BERIL_URL,
+              color: "#2563eb",
+              fontSize: 8,
+              decoration: "underline",
+            },
+          ],
+        },
+        {
+          text: `${currentPage} / ${pageCount}`,
+          alignment: "right",
+          color: "#888888",
+          fontSize: 8,
+        },
+      ],
+    }),
     defaultStyle: {
       font: "Roboto",
       fontSize: 11,
