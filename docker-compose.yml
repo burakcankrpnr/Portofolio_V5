@@ -9,16 +9,18 @@ services:
     environment:
       BERIL_HOST: "0.0.0.0"
       BERIL_PORT: "3001"
-      # Local: proje kökündeki .env otomatik interpolate edilir.
-      # Jenkins: job'a OPENAI_API_KEY / OPENAI_MODEL secret olarak ekle.
+      BERIL_DATA_DIR: "/data"
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    volumes:
+      - beril-data:/data
     expose:
       - "3001"
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    # /data volume yazılabilir; kök fs read_only
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=50M
@@ -56,3 +58,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+volumes:
+  beril-data:

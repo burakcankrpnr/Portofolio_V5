@@ -17,6 +17,8 @@ export default defineConfig({
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+        timeout: 300000,
+        proxyTimeout: 300000,
         configure: (proxy) => {
           proxy.on('error', (err, _req, res) => {
             console.error('[vite proxy /api]', err.message)

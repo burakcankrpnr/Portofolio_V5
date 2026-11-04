@@ -1,7 +1,27 @@
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+let workerReady = null;
+
+/** Yanlış MIME (.mjs) yüzünden worker import’u patlamasın diye blob URL kullan. */
+function ensurePdfWorker() {
+  if (workerReady) return workerReady;
+
+  workerReady = (async () => {
+    try {
+      const res = await fetch(pdfWorkerUrl);
+      if (!res.ok) throw new Error(`PDF worker alınamadı (${res.status})`);
+      const code = await res.text();
+      const blob = new Blob([code], { type: "text/javascript" });
+      pdfjs.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
+    } catch {
+      // Son çare: doğrudan asset URL (nginx MIME düzeltmesiyle çalışır)
+      pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    }
+  })();
+
+  return workerReady;
+}
 
 /**
  * PDF dosyasından sayfa sayfa düz metin çıkarır.
@@ -9,6 +29,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
  * @returns {Promise<{ title: string, pages: string[], pageCount: number }>}
  */
 export async function extractPdfText(file) {
+  await ensurePdfWorker();
+
   const data =
     file instanceof ArrayBuffer
       ? new Uint8Array(file)

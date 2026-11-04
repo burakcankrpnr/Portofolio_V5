@@ -9,7 +9,10 @@ COPY server ./server
 
 ENV BERIL_HOST=0.0.0.0
 ENV BERIL_PORT=3001
+ENV BERIL_DATA_DIR=/data
 ENV NODE_ENV=production
+
+RUN mkdir -p /data
 
 EXPOSE 3001
 

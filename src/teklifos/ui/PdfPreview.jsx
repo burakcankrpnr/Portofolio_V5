@@ -3,7 +3,23 @@ import { useEffect, useRef, useState } from "react";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-GlobalWorkerOptions.workerSrc = workerUrl;
+let workerReady = null;
+function ensureWorker() {
+  if (workerReady) return workerReady;
+  workerReady = (async () => {
+    try {
+      const res = await fetch(workerUrl);
+      if (!res.ok) throw new Error("worker fetch failed");
+      const code = await res.text();
+      GlobalWorkerOptions.workerSrc = URL.createObjectURL(
+        new Blob([code], { type: "text/javascript" })
+      );
+    } catch {
+      GlobalWorkerOptions.workerSrc = workerUrl;
+    }
+  })();
+  return workerReady;
+}
 
 export default function PdfPreview({ data }) {
   const hostRef = useRef(null);
@@ -15,6 +31,7 @@ export default function PdfPreview({ data }) {
     let loadingTask = null;
     setError("");
     (async () => {
+      await ensureWorker();
       const bytes = data instanceof Uint8Array ? data.slice() : new Uint8Array(data);
       loadingTask = getDocument({ data: bytes });
       const pdf = await loadingTask.promise;

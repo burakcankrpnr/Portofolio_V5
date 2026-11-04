@@ -29,3 +29,6 @@ dist-ssr
 .env.local
 .env.development
 .env.production
+
+# Beril arka plan işleri (local)
+.beril-data

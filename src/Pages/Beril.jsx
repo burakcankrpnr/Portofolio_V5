@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { extractPdfText } from "../beril/extractPdfText";
-import { checkBerilHealth, translatePages } from "../beril/translateApi";
-import { buildTranslatedPdfBlob, downloadBlob } from "../beril/buildTranslatedPdf";
 import {
-  clearHistory,
-  formatHistoryDate,
-  listHistory,
-  removeHistoryItem,
-  saveHistoryItem,
-} from "../beril/historyStore";
+  checkBerilHealth,
+  createServerJob,
+  deleteServerJob,
+  downloadServerJob,
+  listServerJobs,
+} from "../beril/jobsApi";
 import HeartEdges from "../beril/HeartEdges";
 
 const STATUS = {
-  queued: "Bekliyor",
+  queued: "Sırada (arka plan)",
   extracting: "Metin çıkarılıyor",
   translating: "Çevriliyor",
+  building: "PDF hazırlanıyor",
   ready: "Hazır",
   error: "Hata",
 };
@@ -24,25 +22,7 @@ const STATUS = {
 const SPOTIFY_BLEND =
   "https://open.spotify.com/blend/taste-match/97b013ce61aa7b5d?si=fxBnHNj7TQ-wt6cdsavLPw&fallback=getapp&blendDecoration=5f9c38d2";
 
-function makeJob(file) {
-  return {
-    id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
-    file,
-    name: file.name,
-    pageCount: null,
-    status: "queued",
-    error: null,
-    blob: null,
-    percent: 0,
-  };
-}
-
-function jobPercent(job) {
-  if (typeof job.percent === "number") return Math.max(0, Math.min(100, Math.round(job.percent)));
-  if (job.status === "ready") return 100;
-  if (job.status === "queued") return 0;
-  return 0;
-}
+const ACTIVE = new Set(["queued", "extracting", "translating", "building"]);
 
 const SpotifyIcon = ({ className = "h-8 w-8" }) => (
   <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -50,40 +30,33 @@ const SpotifyIcon = ({ className = "h-8 w-8" }) => (
   </svg>
 );
 
+function formatDate(ts) {
+  try {
+    return new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short" }).format(
+      new Date(ts)
+    );
+  } catch {
+    return "";
+  }
+}
+
 const BerilPage = () => {
   const inputId = useId();
   const inputRef = useRef(null);
-  const jobsRef = useRef([]);
-  const busyRef = useRef(false);
   const [jobs, setJobs] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [health, setHealth] = useState({ loading: true, ok: false, model: "", error: "" });
+  const [banner, setBanner] = useState("");
 
-  const refreshHistory = useCallback(async () => {
+  const refreshJobs = useCallback(async () => {
     try {
-      const items = await listHistory();
-      setHistory(items);
+      const list = await listServerJobs();
+      setJobs(list);
     } catch {
-      setHistory([]);
-    } finally {
-      setHistoryLoading(false);
+      /* keep previous */
     }
   }, []);
-
-  useEffect(() => {
-    jobsRef.current = jobs;
-  }, [jobs]);
-
-  useEffect(() => {
-    busyRef.current = busy;
-  }, [busy]);
-
-  useEffect(() => {
-    refreshHistory();
-  }, [refreshHistory]);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,116 +69,55 @@ const BerilPage = () => {
           model: data.model || "",
           error: data.ok
             ? ""
-            : "OPENAI_API_KEY deployment’ta yok (.env → Docker beril servisi / Vercel Env)",
+            : "OPENAI_API_KEY deployment’ta yok (Jenkins Credentials / .env)",
         });
       })
       .catch((error) => {
         if (cancelled) return;
-        setHealth({
-          loading: false,
-          ok: false,
-          model: "",
-          error: error.message || "Sunucu yok",
-        });
+        setHealth({ loading: false, ok: false, model: "", error: error.message || "Sunucu yok" });
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const updateJob = useCallback((id, patch) => {
-    setJobs((prev) => prev.map((job) => (job.id === id ? { ...job, ...patch } : job)));
-  }, []);
+  useEffect(() => {
+    refreshJobs();
+  }, [refreshJobs]);
 
-  const processQueue = useCallback(async () => {
-    if (busyRef.current) return;
-    busyRef.current = true;
-    setBusy(true);
-
-    const pending = jobsRef.current.filter(
-      (job) => job.status === "queued" || job.status === "error"
-    );
-
-    for (const job of pending) {
-      try {
-        updateJob(job.id, {
-          status: "extracting",
-          error: null,
-          blob: null,
-          percent: 4,
-        });
-        const extracted = await extractPdfText(job.file);
-        updateJob(job.id, {
-          status: "translating",
-          pageCount: extracted.pageCount,
-          percent: 8,
-          progress: `0/${extracted.pageCount}`,
-        });
-
-        const translated = await translatePages({
-          title: extracted.title,
-          pages: extracted.pages,
-          onProgress: (done, total) => {
-            const ratio = total ? done / total : 1;
-            const percent = Math.round(8 + ratio * 90);
-            updateJob(job.id, {
-              progress: `${done}/${total}`,
-              percent,
-            });
-          },
-        });
-
-        updateJob(job.id, { percent: 98 });
-
-        const blob = await buildTranslatedPdfBlob({
-          title: `${extracted.title} (TR)`,
-          pages: translated.pages,
-        });
-
-        await saveHistoryItem({
-          id: job.id,
-          name: job.name,
-          pageCount: extracted.pageCount,
-          blob,
-          createdAt: Date.now(),
-        });
-        await refreshHistory();
-
-        updateJob(job.id, { status: "ready", blob, percent: 100 });
-      } catch (error) {
-        updateJob(job.id, {
-          status: "error",
-          error: error.message || "İşlem başarısız",
-          percent: 0,
-        });
-      }
-    }
-
-    busyRef.current = false;
-    setBusy(false);
-  }, [refreshHistory, updateJob]);
+  // Aktif iş varken poll — sekme kapalı olsa bile sunucu devam eder; açınca yakalanır
+  useEffect(() => {
+    const hasActive = jobs.some((j) => ACTIVE.has(j.status));
+    if (!hasActive) return undefined;
+    const timer = setInterval(() => {
+      refreshJobs();
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [jobs, refreshJobs]);
 
   const addFiles = useCallback(
-    (fileList) => {
+    async (fileList) => {
       const pdfs = [...fileList].filter(
         (file) => file.type === "application/pdf" || /\.pdf$/i.test(file.name)
       );
-      if (!pdfs.length) return;
-      setJobs((prev) => [...prev, ...pdfs.map(makeJob)]);
-    },
-    []
-  );
+      if (!pdfs.length || !health.ok) return;
 
-  // Dosya eklenince API hazırsa otomatik başlat
-  useEffect(() => {
-    if (!health.ok || busy) return;
-    const hasPending = jobs.some((j) => j.status === "queued");
-    if (!hasPending) return;
-    const timer = setTimeout(() => {
-      processQueue();
-    }, 180);
-    return () => clearTimeout(timer);
-  }, [jobs, health.ok, busy, processQueue]);
+      setUploading(true);
+      setBanner("");
+      try {
+        for (const file of pdfs) {
+          await createServerJob(file);
+        }
+        setBanner("Yüklendi — çeviri sunucuda arka planda sürüyor. Sayfayı kapatabilirsin.");
+        await refreshJobs();
+      } catch (error) {
+        setBanner(error.message || "Yükleme başarısız");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [health.ok, refreshJobs]
+  );
 
   const onDrop = (event) => {
     event.preventDefault();
@@ -213,20 +125,8 @@ const BerilPage = () => {
     addFiles(event.dataTransfer.files);
   };
 
-  const removeJob = async (job) => {
-    setJobs((prev) => prev.filter((j) => j.id !== job.id));
-    if (job.status === "ready") {
-      try {
-        await removeHistoryItem(job.id);
-        await refreshHistory();
-      } catch {
-        /* ignore */
-      }
-    }
-  };
-
-  const activeIds = new Set(jobs.map((j) => j.id));
-  const pastOnly = history.filter((item) => !activeIds.has(item.id));
+  const activeJobs = jobs.filter((j) => ACTIVE.has(j.status) || j.status === "error");
+  const readyJobs = jobs.filter((j) => j.status === "ready");
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-gece text-kar">
@@ -256,8 +156,8 @@ const BerilPage = () => {
 
       <main className="relative z-10 shell py-8 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:py-10 md:py-14">
         <p className="max-w-2xl text-[15px] leading-relaxed text-sis sm:text-[17px]">
-          İngilizce ders notu PDF’lerini Türkçeye çevirir. Tek veya toplu yükleyin; biten dosyaları
-          PDF olarak indirin. Eski çeviriler bu tarayıcıda saklanır.
+          PDF’i yükle; çeviri <strong className="font-medium text-kar">sunucuda arka planda</strong>{" "}
+          devam eder. Sekmeyi kapatsan da iş sürer — sonra buradan indirirsin.
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-3 text-sm sm:mt-6">
@@ -285,6 +185,12 @@ const BerilPage = () => {
           </span>
         </div>
 
+        {banner && (
+          <p className="mt-4 rounded-xl border border-kayisi/30 bg-kayisi/10 px-4 py-3 text-sm text-kayisi">
+            {banner}
+          </p>
+        )}
+
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -304,15 +210,16 @@ const BerilPage = () => {
             <span className="hidden sm:inline">PDF bırakın</span>
           </p>
           <p className="mt-2 text-sm text-sis sm:text-base">
-            <span className="sm:hidden">Galeriden veya dosyalardan yükleyin — tekli ve toplu</span>
-            <span className="hidden sm:inline">veya dosya seçin — tekli ve toplu desteklenir</span>
+            Yükledikten sonra sayfayı kapatabilirsin — çeviri arka planda biter
           </p>
           <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <label
               htmlFor={inputId}
-              className="cursor-pointer rounded-lg bg-kayisi px-5 py-3 text-center text-sm font-medium text-gece transition hover:brightness-110 sm:py-2.5"
+              className={`cursor-pointer rounded-lg bg-kayisi px-5 py-3 text-center text-sm font-medium text-gece transition hover:brightness-110 sm:py-2.5 ${
+                !health.ok || uploading ? "pointer-events-none opacity-40" : ""
+              }`}
             >
-              Dosya seç
+              {uploading ? "Yükleniyor…" : "Dosya seç"}
             </label>
             <input
               id={inputId}
@@ -320,69 +227,47 @@ const BerilPage = () => {
               type="file"
               accept="application/pdf,.pdf"
               multiple
+              disabled={!health.ok || uploading}
               className="sr-only"
               onChange={(e) => {
                 addFiles(e.target.files || []);
                 e.target.value = "";
               }}
             />
-            <button
-              type="button"
-              disabled={!jobs.some((j) => j.status === "queued" || j.status === "error") || busy || !health.ok}
-              onClick={processQueue}
-              className="rounded-lg border border-cizgi px-5 py-3 text-sm text-kar transition enabled:hover:border-lila enabled:hover:text-lila disabled:cursor-not-allowed disabled:opacity-40 sm:py-2.5"
-            >
-              {busy ? "Çevriliyor…" : "Çeviriyi başlat"}
-            </button>
           </div>
         </div>
 
-        {jobs.length > 0 && (
+        {activeJobs.length > 0 && (
           <section className="mt-10">
-            <h2 className="mb-3 text-sm text-sis">Kuyruk</h2>
+            <h2 className="mb-3 text-sm text-sis">Devam eden / bekleyen</h2>
             <ul className="space-y-3">
-              {jobs.map((job) => {
-                const pct = jobPercent(job);
+              {activeJobs.map((job) => {
+                const pct = Math.round(job.percent || 0);
                 return (
-                  <li
-                    key={job.id}
-                    className="rounded-xl border border-cizgi bg-murekkep px-4 py-4"
-                  >
+                  <li key={job.id} className="rounded-xl border border-cizgi bg-murekkep px-4 py-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <p className="break-all font-medium text-kar sm:truncate">{job.name}</p>
                         <p className="mt-1 break-words text-sm text-sis">
-                          {STATUS[job.status]}
-                          {job.status !== "queued" && job.status !== "error" ? ` · %${pct}` : ""}
-                          {job.status === "translating" && job.progress ? ` (${job.progress})` : ""}
+                          {STATUS[job.status] || job.status}
+                          {ACTIVE.has(job.status) ? ` · %${pct}` : ""}
+                          {job.progress ? ` (${job.progress})` : ""}
                           {job.pageCount != null ? ` · ${job.pageCount} sayfa` : ""}
                           {job.error ? ` · ${job.error}` : ""}
                         </p>
                       </div>
-                      <div className="flex w-full shrink-0 gap-2 sm:w-auto">
-                        {job.status === "ready" && job.blob && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              downloadBlob(job.blob, job.name.replace(/\.pdf$/i, "") + "-TR.pdf")
-                            }
-                            className="flex-1 rounded-lg bg-kayisi px-4 py-2.5 text-sm font-medium text-gece sm:flex-none sm:py-2"
-                          >
-                            PDF’e tıkla
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeJob(job)}
-                          className="flex-1 rounded-lg border border-cizgi px-4 py-2.5 text-sm text-sis hover:text-kar sm:flex-none sm:py-2"
-                        >
-                          Kaldır
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await deleteServerJob(job.id);
+                          await refreshJobs();
+                        }}
+                        className="w-full rounded-lg border border-cizgi px-4 py-2.5 text-sm text-sis hover:text-kar sm:w-auto sm:py-2"
+                      >
+                        Kaldır
+                      </button>
                     </div>
-                    {(job.status === "extracting" ||
-                      job.status === "translating" ||
-                      job.status === "ready") && (
+                    {ACTIVE.has(job.status) && (
                       <div className="mt-3">
                         <div className="h-2 overflow-hidden rounded-full bg-gece">
                           <div
@@ -402,48 +287,39 @@ const BerilPage = () => {
 
         <section className="mt-12">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm text-sis">Önceki çeviriler</h2>
-            {pastOnly.length > 0 && (
-              <button
-                type="button"
-                onClick={async () => {
-                  await clearHistory();
-                  setJobs((prev) => prev.filter((j) => j.status !== "ready"));
-                  await refreshHistory();
-                }}
-                className="text-sm text-sis underline-offset-2 hover:text-kar hover:underline"
-              >
-                Tümünü sil
-              </button>
-            )}
+            <h2 className="text-sm text-sis">Hazır çeviriler</h2>
+            <button
+              type="button"
+              onClick={refreshJobs}
+              className="text-sm text-sis underline-offset-2 hover:text-kar hover:underline"
+            >
+              Yenile
+            </button>
           </div>
 
-          {historyLoading ? (
-            <p className="text-sm text-sis">Yükleniyor…</p>
-          ) : pastOnly.length === 0 ? (
+          {readyJobs.length === 0 ? (
             <p className="rounded-xl border border-cizgi bg-murekkep/40 px-4 py-6 text-sm text-sis">
-              Henüz kayıtlı çeviri yok. Biten PDF’ler burada listelenir ve tekrar indirilebilir.
+              Henüz hazır PDF yok. Bitince burada listelenir; tarayıcıyı kapatsan da kaybolmaz.
             </p>
           ) : (
             <ul className="space-y-3">
-              {pastOnly.map((item) => (
+              {readyJobs.map((job) => (
                 <li
-                  key={item.id}
+                  key={job.id}
                   className="flex flex-col gap-3 rounded-xl border border-cizgi bg-murekkep px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
-                    <p className="break-all font-medium text-kar sm:truncate">{item.name}</p>
+                    <p className="break-all font-medium text-kar sm:truncate">{job.name}</p>
                     <p className="mt-1 text-sm text-sis">
-                      {formatHistoryDate(item.createdAt)}
-                      {item.pageCount != null ? ` · ${item.pageCount} sayfa` : ""}
+                      {formatDate(job.updatedAt || job.createdAt)}
+                      {job.pageCount != null ? ` · ${job.pageCount} sayfa` : ""}
+                      {" · %100"}
                     </p>
                   </div>
                   <div className="flex w-full shrink-0 gap-2 sm:w-auto">
                     <button
                       type="button"
-                      onClick={() =>
-                        downloadBlob(item.blob, item.name.replace(/\.pdf$/i, "") + "-TR.pdf")
-                      }
+                      onClick={() => downloadServerJob(job.id, job.name)}
                       className="flex-1 rounded-lg bg-kayisi px-4 py-2.5 text-sm font-medium text-gece sm:flex-none sm:py-2"
                     >
                       PDF’e tıkla
@@ -451,8 +327,8 @@ const BerilPage = () => {
                     <button
                       type="button"
                       onClick={async () => {
-                        await removeHistoryItem(item.id);
-                        await refreshHistory();
+                        await deleteServerJob(job.id);
+                        await refreshJobs();
                       }}
                       className="flex-1 rounded-lg border border-cizgi px-4 py-2.5 text-sm text-sis hover:text-kar sm:flex-none sm:py-2"
                     >
@@ -470,13 +346,9 @@ const BerilPage = () => {
             className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#1DB954]/15 blur-3xl"
             aria-hidden
           />
-          <div
-            className="pointer-events-none absolute -bottom-8 left-8 h-28 w-28 rounded-full bg-kayisi/10 blur-2xl"
-            aria-hidden
-          />
           <div className="relative flex flex-col items-stretch gap-5 sm:gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1DB954] text-gece shadow-[0_0_40px_-8px_rgba(29,185,84,0.7)] sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1DB954] text-gece sm:h-14 sm:w-14">
                 <SpotifyIcon className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
               <div className="min-w-0">
@@ -506,18 +378,6 @@ const BerilPage = () => {
             </a>
           </div>
         </section>
-
-        <p className="mt-10 text-center text-sm text-sis">
-          Canlı:{" "}
-          <a
-            href="https://burakcankorpinar.dev/beril"
-            className="text-lila underline decoration-cizgi underline-offset-4 hover:text-kayisi hover:decoration-kayisi"
-            target="_blank"
-            rel="noreferrer"
-          >
-            burakcankorpinar.dev/beril
-          </a>
-        </p>
       </main>
     </div>
   );
