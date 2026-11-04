@@ -11,20 +11,26 @@ Kurallar:
 - Madde işaretleri, numaralar, tarih ve hafta etiketleri gibi yapıyı koru.
 - Yanıtını yalnızca geçerli JSON olarak ver: {"pages":["..."]} — pages dizisi girişteki sayfa sayısıyla aynı uzunlukta olmalı.`;
 
-/** Jenkins Username/Password veya yapışık MODEL değerini ayıklar. */
+/** Jenkins’e .env satırı / model yapışınca bozulan key’i ayıklar. */
 export function normalizeApiKey(raw) {
   let key = String(raw || "")
     .trim()
     .replace(/^["']|["']$/g, "");
 
-  // credentials('id') Username/Password → "sk-...:gpt-4o-mini"
+  // "OPENAI_API_KEY=sk-..." diye tüm satır yapıştırılmışsa
+  key = key.replace(/^OPENAI_API_KEY\s*=\s*/i, "");
+
+  // "sk-...OPENAI_MODEL=gpt-4o-mini" (satır sonu kaybolmuş .env kopyası)
+  key = key.replace(/OPENAI_MODEL\s*=.*$/i, "");
+  key = key.replace(/BERIL_PORT\s*=.*$/i, "");
+
+  // Username/Password credential → "sk-...:gpt-4o-mini"
   if (key.includes(":gpt-") || /:gpt-4/.test(key)) {
-    key = key.split(":")[0].trim();
+    key = key.split(":")[0];
   }
 
-  // Secret text'e yanlışlıkla model de yapıştırılmış
-  key = key.replace(/\s*gpt-4o-mini\s*$/i, "").trim();
-  key = key.split(/\r?\n/)[0].trim();
+  key = key.replace(/\s*gpt-4o-mini\s*$/i, "");
+  key = key.split(/\r?\n/)[0].trim().replace(/^["']|["']$/g, "");
 
   return key;
 }
