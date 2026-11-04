@@ -64,10 +64,9 @@ export async function loadJobsFromDisk() {
       const raw = await readFile(join(DATA_DIR, file), "utf8");
       const meta = JSON.parse(raw);
       if (meta.status === "extracting" || meta.status === "translating" || meta.status === "building") {
+        // building'de kalmış iş yeniden kuyruğa girer; .translated.json varsa API tekrarlanmaz
         meta.status = "queued";
-        meta.percent = 0;
         meta.error = null;
-        meta.progress = null;
       }
       jobs.set(meta.id, meta);
     } catch {
@@ -178,12 +177,17 @@ async function extractPages(buffer) {
   return pages;
 }
 
+function translatedPath(id) {
+  return join(DATA_DIR, `${id}.translated.json`);
+}
+
 async function buildPdfBuffer(title, pages) {
   const pdfMakeModule = await import("pdfmake/build/pdfmake.js");
   const pdfFontsModule = await import("pdfmake/build/vfs_fonts.js");
   const pdfMake = pdfMakeModule.default || pdfMakeModule;
   const fonts = pdfFontsModule.default || pdfFontsModule;
   const vfs = fonts.pdfMake?.vfs || fonts.vfs || fonts;
+  if (!vfs || typeof vfs !== "object") throw new Error("PDF font vfs yüklenemedi");
   if (typeof pdfMake.addVirtualFileSystem === "function") pdfMake.addVirtualFileSystem(vfs);
   else pdfMake.vfs = vfs;
 
@@ -210,15 +214,11 @@ async function buildPdfBuffer(title, pages) {
     },
   };
 
-  return new Promise((resolve, reject) => {
-    try {
-      pdfMake.createPdf(definition).getBuffer((buffer) => {
-        resolve(Buffer.from(buffer));
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
+  // pdfmake 0.3+: getBuffer() Promise döner — callback ile beklemek %92'de takılıyor
+  const pdf = pdfMake.createPdf(definition);
+  const buffer = await pdf.getBuffer();
+  if (!buffer) throw new Error("PDF buffer boş");
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
 }
 
 async function processJob(job) {
@@ -239,20 +239,40 @@ async function processJob(job) {
     job.progress = `0/${pages.length}`;
     await persist(job);
 
-    const translated = [];
     const title = job.name.replace(/\.pdf$/i, "");
-    for (let i = 0; i < pages.length; i += MAX_PAGES_PER_REQUEST) {
-      const batch = pages.slice(i, i + MAX_PAGES_PER_REQUEST);
-      const result = await translateBatch(batch, title);
-      translated.push(...result.pages);
-      const done = Math.min(i + batch.length, pages.length);
-      job.progress = `${done}/${pages.length}`;
-      job.percent = Math.round(10 + (done / pages.length) * 80);
-      await persist(job);
+    let translated = [];
+
+    // Daha önce çevrilmiş sayfalar varsa (PDF aşamasında kalmış iş) tekrar API çağırma
+    try {
+      const saved = JSON.parse(await readFile(translatedPath(job.id), "utf8"));
+      if (Array.isArray(saved.pages) && saved.pages.length === pages.length) {
+        translated = saved.pages;
+      }
+    } catch {
+      /* yok */
+    }
+
+    if (translated.length !== pages.length) {
+      translated = [];
+      for (let i = 0; i < pages.length; i += MAX_PAGES_PER_REQUEST) {
+        const batch = pages.slice(i, i + MAX_PAGES_PER_REQUEST);
+        const result = await translateBatch(batch, title);
+        translated.push(...result.pages);
+        const done = Math.min(i + batch.length, pages.length);
+        job.progress = `${done}/${pages.length}`;
+        job.percent = Math.round(10 + (done / pages.length) * 80);
+        await persist(job);
+      }
+      await writeFile(
+        translatedPath(job.id),
+        JSON.stringify({ title, pages: translated }),
+        "utf8"
+      );
     }
 
     job.status = "building";
     job.percent = 92;
+    job.progress = `${pages.length}/${pages.length}`;
     await persist(job);
 
     const pdfBuffer = await buildPdfBuffer(`${title} (TR)`, translated);
@@ -260,6 +280,7 @@ async function processJob(job) {
     job.status = "ready";
     job.percent = 100;
     job.progress = `${pages.length}/${pages.length}`;
+    job.error = null;
     job.sourceBuffer = undefined;
     await persist(job);
 
@@ -268,10 +289,17 @@ async function processJob(job) {
     } catch {
       /* ignore */
     }
+    try {
+      await unlink(translatedPath(job.id));
+    } catch {
+      /* ignore */
+    }
   } catch (error) {
+    console.error("[beril] job error", job.id, error);
     job.status = "error";
     job.error = error.message || "İşlem başarısız";
-    job.percent = 0;
+    // building'de kaldıysa yüzdeyi koru ki kullanıcı görsün
+    if (job.percent < 92) job.percent = 0;
     job.sourceBuffer = undefined;
     await persist(job);
   }
