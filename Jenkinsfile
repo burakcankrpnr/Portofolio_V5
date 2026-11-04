@@ -5,6 +5,10 @@ pipeline {
         GITHUB_CREDENTIAL = credentials('github-access-token')
         GITHUB_URL = "https://${GITHUB_CREDENTIAL}@github.com/burakcankrpnr/Portofolio_V5.git"
         GITHUB_BRANCH = 'main'
+        // Jenkins → Manage Jenkins → Credentials → Secret text
+        // ID: openai-api-key  |  Secret: sk-proj-...
+        OPENAI_API_KEY = credentials('openai-api-key')
+        OPENAI_MODEL = 'gpt-4o-mini'
     }
 
     stages {
