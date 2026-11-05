@@ -20,7 +20,7 @@ const STATUS = {
 };
 
 const SPOTIFY_BLEND =
-  "https://open.spotify.com/blend/taste-match/97b013ce61aa7b5d?si=fxBnHNj7TQ-wt6cdsavLPw&fallback=getapp&blendDecoration=5f9c38d2";
+  "https://open.spotify.com/playlist/37i9dQZF1EJEl0mbbnfDL7?si=umHw7UnWTdSkHZwIk7odIQ&utm_source=copy-link&pi=QEAzH5TGRfOJq";
 
 const ACTIVE = new Set(["queued", "extracting", "translating", "building"]);
 
@@ -360,10 +360,10 @@ const BerilPage = () => {
                   className="mt-2 max-w-xl display text-xl font-semibold leading-snug text-kar sm:text-2xl md:text-3xl"
                   style={{ fontVariationSettings: '"wdth" 90' }}
                 >
-                  Burak seni Spotify’da bir Blend’e katılmaya davet etti
+                  Blend’e katıldın
                 </p>
                 <p className="mt-3 max-w-lg text-sm leading-relaxed text-sis sm:text-[15px]">
-                  Spotify mobil uygulamasından katıl. Ortak zevkleriniz bir araya gelsin.
+                  Ortak listeniz hazır. Buradan açabilirsin.
                 </p>
               </div>
             </div>
@@ -374,7 +374,7 @@ const BerilPage = () => {
               className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-full bg-[#1DB954] px-6 py-3.5 text-sm font-semibold text-[#04140a] transition hover:brightness-110 md:w-auto"
             >
               <Heart className="h-4 w-4 fill-current" aria-hidden />
-              Blend’e katıl
+              Blend’i aç
             </a>
           </div>
         </section>
