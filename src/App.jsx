@@ -17,6 +17,7 @@ import {
 import NotFound from "./Pages/NotFound";
 import BerilPage from "./Pages/Beril";
 import TeklifOsRoute from "./teklifos/TeklifOsRoute";
+import FollowScopeRoute from "./followscope/FollowScopeRoute";
 
 const SITE_ORIGIN = "https://burakcankorpinar.dev";
 
@@ -166,6 +167,7 @@ function App() {
         <Route path="/beril" element={<BerilPage />} />
         <Route path="/buse/*" element={<TeklifOsRoute />} />
         <Route path="/teklifos/*" element={<LegacyTeklifRedirect />} />
+        <Route path="/followscope/*" element={<FollowScopeRoute />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

@@ -3,6 +3,6 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/teklifos/**/*.test.js"],
+    include: ["src/teklifos/**/*.test.js", "src/followscope/**/*.test.js"],
   },
 });
