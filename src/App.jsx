@@ -167,7 +167,8 @@ function App() {
         <Route path="/beril" element={<BerilPage />} />
         <Route path="/buse/*" element={<TeklifOsRoute />} />
         <Route path="/teklifos/*" element={<LegacyTeklifRedirect />} />
-        <Route path="/followscope/*" element={<FollowScopeRoute />} />
+        <Route path="/instagram/*" element={<FollowScopeRoute />} />
+        <Route path="/followscope/*" element={<Navigate to="/instagram" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

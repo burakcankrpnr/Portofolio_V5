@@ -1,6 +1,6 @@
 # FollowScope
 
-Instagram resmi ZIP arşiviyle yerel takip analizi. Rota: `/followscope`.
+Instagram resmi ZIP arşiviyle yerel takip analizi. Rota: `/instagram`.
 
 ## Güvenlik
 
@@ -16,7 +16,7 @@ npm install
 npm run dev:only
 ```
 
-Aç: http://localhost:5173/followscope
+Aç: http://localhost:5173/instagram
 
 Test:
 

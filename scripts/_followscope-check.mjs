@@ -39,7 +39,7 @@ const fail = async (label) => {
   process.exit(1);
 };
 
-await page.goto("http://localhost:5173/followscope", { waitUntil: "networkidle" });
+await page.goto("http://localhost:5173/instagram", { waitUntil: "networkidle" });
 await page.locator('input[type="file"]').setInputFiles({
   name: "instagram-export.zip",
   mimeType: "application/zip",

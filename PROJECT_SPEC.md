@@ -163,7 +163,7 @@ src/followscope/
     └── storage/
 ```
 
-Uygulama rotası: `/followscope`
+Uygulama rotası: `/instagram`
 
 ---
 
@@ -295,7 +295,7 @@ Ek testler: büyük/küçük harf, `@` öneki, boşluk, tekrar, eksik alan, boş
 
 ### Aşama 1 — Temel proje
 
-- Vite + React iskeleti (portfolyo içinde `/followscope`)
+- Vite + React iskeleti (portfolyo içinde `/instagram`)
 - Tailwind ile koyu premium responsive dashboard
 - Sayfa düzeni ve navigasyon
 - Henüz Instagram ayrıştırması veya sahte gerçek sonuç yok

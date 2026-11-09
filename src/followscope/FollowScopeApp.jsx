@@ -15,7 +15,7 @@ function Missing() {
     <EmptyState
       title="Sayfa bulunamadı"
       body="Bu bölüm FollowScope içinde yok."
-      action={<a className="fs-btn fs-btn-secondary" href="/followscope">Genel bakışa dön</a>}
+      action={<a className="fs-btn fs-btn-secondary" href="/instagram">Genel bakışa dön</a>}
     />
   );
 }
@@ -50,7 +50,7 @@ export default function FollowScopeApp() {
           <Route path="karsilikli" element={<MutualsPage />} />
           <Route path="gecmis" element={<HistoryPage />} />
           <Route path="ayarlar" element={<SettingsPage />} />
-          <Route path="dashboard" element={<Navigate to="/followscope" replace />} />
+          <Route path="dashboard" element={<Navigate to="/instagram" replace />} />
           <Route path="*" element={<Missing />} />
         </Routes>
       </AppShell>

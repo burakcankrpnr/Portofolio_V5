@@ -14,12 +14,12 @@ import {
 } from "lucide-react";
 
 const NAV = [
-  { to: "/followscope", label: "Genel Bakış", icon: LayoutDashboard, end: true },
-  { to: "/followscope/geri-takip-etmeyenler", label: "Geri Takip Etmeyenler", icon: UserMinus },
-  { to: "/followscope/takip-etmediklerim", label: "Takip Etmediklerim", icon: UserPlus },
-  { to: "/followscope/karsilikli", label: "Karşılıklı Takip", icon: Users },
-  { to: "/followscope/gecmis", label: "Değişim Geçmişi", icon: ArrowLeftRight },
-  { to: "/followscope/ayarlar", label: "Ayarlar", icon: Settings },
+  { to: "/instagram", label: "Genel Bakış", icon: LayoutDashboard, end: true },
+  { to: "/instagram/geri-takip-etmeyenler", label: "Geri Takip Etmeyenler", icon: UserMinus },
+  { to: "/instagram/takip-etmediklerim", label: "Takip Etmediklerim", icon: UserPlus },
+  { to: "/instagram/karsilikli", label: "Karşılıklı Takip", icon: Users },
+  { to: "/instagram/gecmis", label: "Değişim Geçmişi", icon: ArrowLeftRight },
+  { to: "/instagram/ayarlar", label: "Ayarlar", icon: Settings },
 ];
 
 export default function AppShell({ children }) {
@@ -37,7 +37,7 @@ export default function AppShell({ children }) {
       ) : null}
 
       <aside className={`fs-sidebar ${mobileOpen ? "is-open" : ""}`}>
-        <NavLink to="/followscope" end className="fs-brand" onClick={() => setMobileOpen(false)}>
+        <NavLink to="/instagram" end className="fs-brand" onClick={() => setMobileOpen(false)}>
           <span className="fs-mark">FS</span>
           <span>
             <strong>FollowScope</strong>

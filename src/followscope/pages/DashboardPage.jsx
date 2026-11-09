@@ -33,7 +33,7 @@ export default function DashboardPage() {
         description="Instagram resmi veri arşivini yükleyerek takip listelerini karşılaştır. Analiz yalnızca cihazında çalışır."
         actions={
           current ? (
-            <Link className="fs-btn fs-btn-primary" to="/followscope/geri-takip-etmeyenler">
+            <Link className="fs-btn fs-btn-primary" to="/instagram/geri-takip-etmeyenler">
               Geri takip etmeyenler
             </Link>
           ) : null
@@ -89,10 +89,10 @@ export default function DashboardPage() {
             çağırmaz. ZIP tarayıcıda açılır.
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Link className="fs-btn fs-btn-secondary" to="/followscope/ayarlar">
+            <Link className="fs-btn fs-btn-secondary" to="/instagram/ayarlar">
               Ayarlar
             </Link>
-            <Link className="fs-btn fs-btn-secondary" to="/followscope/gecmis">
+            <Link className="fs-btn fs-btn-secondary" to="/instagram/gecmis">
               Değişim geçmişi
             </Link>
           </div>
