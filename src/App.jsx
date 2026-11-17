@@ -15,7 +15,7 @@ import {
   useSmoothScroll,
 } from "./lib/motion";
 import NotFound from "./Pages/NotFound";
-import BerilPage from "./Pages/Beril";
+// import BerilPage from "./Pages/Beril";
 import TeklifOsRoute from "./teklifos/TeklifOsRoute";
 import FollowScopeRoute from "./followscope/FollowScopeRoute";
 
@@ -164,7 +164,7 @@ function App() {
         <Route path="/portfolio" element={<LandingPage />} />
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/project/:id" element={<ProjectPageLayout />} />
-        <Route path="/beril" element={<BerilPage />} />
+        {/* <Route path="/beril" element={<BerilPage />} /> */}
         <Route path="/buse/*" element={<TeklifOsRoute />} />
         <Route path="/teklifos/*" element={<LegacyTeklifRedirect />} />
         <Route path="/instagram/*" element={<FollowScopeRoute />} />
