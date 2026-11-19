@@ -88,7 +88,7 @@ const AboutPage = () => {
               </p>
               <p>
                 JavaScript, React, Node.js ve modern CSS ile ölçeklenebilir, hızlı arayüzler
-                kuruyorum. Google Ads, Meta Ads, Trendyol Pazaryeri, İkas ve Shopify
+                kuruyorum. Google Ads, Meta Ads, Trendyol Pazaryeri, Hepsiburada, İkas ve Shopify
                 entegrasyonlarında kurumsal projelerde aktif rol alıyorum.
               </p>
               <p>

@@ -103,6 +103,7 @@ const ContactPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   disabled={isSubmitting}
+                  placeholder="İsim Soyisim"
                   className="field"
                   required
                 />
@@ -116,6 +117,7 @@ const ContactPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isSubmitting}
+                  placeholder="ornek@email.com"
                   className="field"
                   required
                 />

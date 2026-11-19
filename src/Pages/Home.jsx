@@ -1,4 +1,4 @@
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { myWebsites } from "../data/projects";
 import { hostOf, previewFileFromUrl } from "../lib/preview";
@@ -14,6 +14,7 @@ const jump = (id) => (e) => {
 
 const Home = ({ ready = Promise.resolve() }) => {
   const root = useRef(null);
+  const strip = useRef(null);
 
   useGSAP(
     () => {
@@ -36,27 +37,76 @@ const Home = ({ ready = Promise.resolve() }) => {
           );
       });
 
-      // Fare ile gezilen geniş ekranlarda şerit scroll ile kayar;
-      // dokunmatik ekranlarda parmakla kaydırılır (CSS overflow-x).
-      mm.add("(prefers-reduced-motion: no-preference) and (min-width: 768px) and (pointer: fine)", () => {
-        const track = root.current.querySelector(".hero-track");
-        gsap.to(track, {
-          x: () => -Math.max(0, track.scrollWidth - window.innerWidth) * 0.55,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".hero-strip",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-          },
-        });
-      });
-
       return () => mm.revert();
     },
     { scope: root }
   );
+
+  // Masaüstünde sürükleyerek / tekerlekle yatay kaydırma
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return undefined;
+
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    const onWheel = (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (el.scrollWidth <= el.clientWidth) return;
+      event.preventDefault();
+      el.scrollLeft += event.deltaY;
+    };
+
+    const onPointerDown = (event) => {
+      if (event.pointerType === "touch") return;
+      if (event.button !== 0) return;
+      dragging = true;
+      moved = false;
+      startX = event.clientX;
+      startScroll = el.scrollLeft;
+      el.setPointerCapture?.(event.pointerId);
+      el.classList.add("is-dragging");
+    };
+
+    const onPointerMove = (event) => {
+      if (!dragging) return;
+      const dx = event.clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      el.scrollLeft = startScroll - dx;
+    };
+
+    const onPointerUp = (event) => {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove("is-dragging");
+      el.releasePointerCapture?.(event.pointerId);
+    };
+
+    const onClickCapture = (event) => {
+      if (!moved) return;
+      event.preventDefault();
+      event.stopPropagation();
+      moved = false;
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("pointercancel", onPointerUp);
+    el.addEventListener("click", onClickCapture, true);
+
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("pointercancel", onPointerUp);
+      el.removeEventListener("click", onClickCapture, true);
+    };
+  }, []);
 
   return (
     <section
@@ -124,7 +174,11 @@ const Home = ({ ready = Promise.resolve() }) => {
         </div>
       </div>
 
-      <div className="hero-strip mt-12 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-pl-4 pb-20 [scrollbar-width:none] sm:scroll-pl-8 md:mt-24 md:pb-32 [&::-webkit-scrollbar]:hidden [@media(min-width:768px)_and_(pointer:fine)]:overflow-visible">
+      <div
+        ref={strip}
+        data-lenis-prevent
+        className="hero-strip mt-12 cursor-grab snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-pl-4 pb-20 [scrollbar-width:none] sm:scroll-pl-8 md:mt-24 md:pb-32 [&::-webkit-scrollbar]:hidden active:cursor-grabbing [&_.hero-shot_a]:select-none"
+      >
         <ul className="hero-track flex w-max gap-3 px-4 sm:gap-4 sm:px-8 md:gap-6 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
           {STRIP.map((p) => (
             <li key={p.id} className="hero-shot snap-start">

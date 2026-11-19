@@ -30,6 +30,7 @@ const techStacks = [
   { icon: "shopify.svg", language: "Shopify" },
   { icon: "ikas.png", language: "İkas" },
   { icon: "trendyol.png", language: "Trendyol Pazaryeri" },
+  { icon: "hepsiburada.svg", language: "Hepsiburada" },
   { icon: "googleads.svg", language: "Google Ads" },
   { icon: "metaads.svg", language: "Meta Ads" },
 ];
