@@ -21,7 +21,6 @@ const Home = ({ ready = Promise.resolve() }) => {
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // Açılış perdesi varsa, perde kalkmaya başlayınca oynat
         const tl = gsap.timeline({ paused: true, delay: 0.15, defaults: { ease: "expo.out" } });
         ready.then(() => tl.play());
         tl.from(".hero-char", { yPercent: 118, duration: 1.15, stagger: 0.032 })
@@ -37,15 +36,38 @@ const Home = ({ ready = Promise.resolve() }) => {
           );
       });
 
+      // Masaüstü: sayfa kaydırınca şerit yatay kayar
+      mm.add(
+        "(prefers-reduced-motion: no-preference) and (min-width: 768px) and (pointer: fine)",
+        () => {
+          const track = root.current?.querySelector(".hero-track");
+          if (!track) return;
+
+          gsap.to(track, {
+            x: () => -Math.max(0, track.scrollWidth - window.innerWidth) * 0.55,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".hero-strip",
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          });
+        }
+      );
+
       return () => mm.revert();
     },
     { scope: root }
   );
 
-  // Masaüstünde sürükleyerek / tekerlekle yatay kaydırma
+  // Dokunmatik / dar ekran: sürükleyerek ve tekerlekle yatay kaydırma
   useEffect(() => {
     const el = strip.current;
     if (!el) return undefined;
+
+    const canNativeScroll = () => el.scrollWidth > el.clientWidth + 2;
 
     let dragging = false;
     let moved = false;
@@ -53,13 +75,14 @@ const Home = ({ ready = Promise.resolve() }) => {
     let startScroll = 0;
 
     const onWheel = (event) => {
+      if (!canNativeScroll()) return;
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-      if (el.scrollWidth <= el.clientWidth) return;
       event.preventDefault();
       el.scrollLeft += event.deltaY;
     };
 
     const onPointerDown = (event) => {
+      if (!canNativeScroll()) return;
       if (event.pointerType === "touch") return;
       if (event.button !== 0) return;
       dragging = true;
@@ -177,7 +200,7 @@ const Home = ({ ready = Promise.resolve() }) => {
       <div
         ref={strip}
         data-lenis-prevent
-        className="hero-strip mt-12 cursor-grab snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-pl-4 pb-20 [scrollbar-width:none] sm:scroll-pl-8 md:mt-24 md:pb-32 [&::-webkit-scrollbar]:hidden active:cursor-grabbing [&_.hero-shot_a]:select-none"
+        className="hero-strip mt-12 cursor-grab snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-pl-4 pb-20 [scrollbar-width:none] sm:scroll-pl-8 md:mt-24 md:pb-32 [&::-webkit-scrollbar]:hidden active:cursor-grabbing [&_.hero-shot_a]:select-none [@media(min-width:768px)_and_(pointer:fine)]:cursor-default [@media(min-width:768px)_and_(pointer:fine)]:overflow-visible"
       >
         <ul className="hero-track flex w-max gap-3 px-4 sm:gap-4 sm:px-8 md:gap-6 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
           {STRIP.map((p) => (
